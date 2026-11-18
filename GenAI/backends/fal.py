@@ -19,7 +19,11 @@ import os
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen, Request
 
-from .base import Backend, BackendError, Status, PENDING, RUNNING, DONE, ERROR
+from .base import (
+    Backend, BackendError, Status, PENDING, RUNNING, DONE, ERROR,
+    looks_like_prompt_denied, prompt_denied_message, format_error, http_error_message,
+    is_transient_http,
+)
 from .. import config
 
 
@@ -71,7 +75,7 @@ class FalBackend(Backend):
 
         request_id = data.get("request_id")
         if not request_id:
-            raise BackendError("fal: keine request_id in der Antwort: {d}".format(d=data))
+            raise BackendError(format_error("no request_id in the response", "fal", str(data)[:300]))
 
         # fal liefert i. d. R. fertige status/response-URLs mit; sonst selbst bauen.
         self._jobs[request_id] = {
@@ -90,7 +94,7 @@ class FalBackend(Backend):
         key = config.get_key("FAL_KEY", required=True)
         job = self._jobs.get(job_id)
         if not job:
-            raise BackendError("fal: unbekannte job_id {j!r}".format(j=job_id))
+            raise BackendError(format_error("unknown job_id {j!r}".format(j=job_id), "fal"))
 
         data = self._request(job["status_url"], key, method="GET")
         raw = (data.get("status") or "").upper()
@@ -103,7 +107,10 @@ class FalBackend(Backend):
         if raw == "IN_QUEUE":
             return Status(PENDING, progress=0.0)
         # Alles andere als Fehler behandeln.
-        return Status(ERROR, error="fal-Status: {s!r}".format(s=raw or data))
+        if looks_like_prompt_denied(str(data)):
+            return Status(ERROR, error=prompt_denied_message("fal"))
+        return Status(ERROR, error=format_error(
+            "unexpected status {s!r}".format(s=raw or "?"), "fal", str(data)[:300]))
 
     # ---- intern ----------------------------------------------------------------
 
@@ -112,7 +119,7 @@ class FalBackend(Backend):
         result = self._request(job["response_url"], key, method="GET")
         url = _first_media_url(result)
         if not url:
-            raise BackendError("fal: keine Medien-URL im Ergebnis: {r}".format(r=result))
+            raise BackendError(format_error("no media URL in the result", "fal", str(result)[:300]))
         return url
 
     def _request(self, url, key, method="GET", body=None):
@@ -131,20 +138,18 @@ class FalBackend(Backend):
                 text = resp.read().decode("utf-8")
         except HTTPError as exc:
             detail = exc.read().decode("utf-8", "replace") if exc.fp else ""
-            raise BackendError(
-                "fal HTTP {code} bei {url}: {detail}".format(
-                    code=exc.code, url=url, detail=detail[:500]
-                )
-            )
+            raise BackendError(http_error_message("fal", detail, code=exc.code, url=url),
+                               transient=is_transient_http(exc.code))
         except URLError as exc:
-            raise BackendError("fal Netzwerkfehler: {r}".format(r=exc.reason))
+            raise BackendError(format_error("network error: {r}".format(r=exc.reason), "fal"),
+                               transient=True)
 
         if not text:
             return {}
         try:
             return json.loads(text)
         except ValueError:
-            raise BackendError("fal: ungültiges JSON: {t}".format(t=text[:500]))
+            raise BackendError(format_error("invalid JSON in the response", "fal", text[:300]))
 
 
 # ---- Hilfsfunktionen (rein, ohne State) --------------------------------------

@@ -13,10 +13,10 @@ import time
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-from ai_gen.backends import get_backend
-from ai_gen.backends.base import DONE, ERROR
+from GenAI.backends import get_backend
+from GenAI.backends.base import DONE, ERROR
 
-with open(os.path.join(ROOT, "ai_gen", "manifest.json"), encoding="utf-8") as fh:
+with open(os.path.join(ROOT, "GenAI", "manifest.json"), encoding="utf-8") as fh:
     model = json.load(fh)["models"][0]  # nano_banana_2
 
 backend = get_backend(model["backend"])

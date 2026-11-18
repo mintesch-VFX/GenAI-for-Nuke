@@ -24,7 +24,7 @@ import uuid
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen, Request
 
-from .base import Backend, BackendError, Status, DONE, ERROR
+from .base import Backend, BackendError, Status, DONE, ERROR, format_error, http_error_message
 from .. import config
 
 
@@ -39,8 +39,8 @@ _RATIOS = {
 _BASE_FOR_RES = {"1K": 1024, "2K": 2048, "4K": 3840}
 _MIN_PIXELS = 1024 * 1024   # gpt-image-2: Mindest-Pixel-Budget (~1 MP)
 _MAX_EDGE = 3840            # gpt-image-2: längste Kante max 3840
-# Resolution setzt direkt die Quality-Stufe (User-Wunsch: 1K=low, 2K=mid, 4K=high).
-_QUALITY_FOR_RES = {"1K": "low", "2K": "medium", "4K": "high"}
+# Quality ist fest auf "high" (User-Wunsch), unabhaengig von der Resolution.
+_QUALITY = "high"
 
 
 def _round16(n):
@@ -79,8 +79,7 @@ class OpenAIBackend(Backend):
         params = params or {}
         resolution = params.get("resolution", "1K")
         size = _size(params.get("aspect_ratio", "1:1"), resolution)
-        # Quality aus der Resolution ableiten (1K=low, 2K=mid, 4K=high).
-        quality = params.get("quality") or _QUALITY_FOR_RES.get(resolution, "auto")
+        quality = _QUALITY
         model_id = model_cfg.get("openai_model", "gpt-image-1")
 
         # GPT Image bearbeitet ein einzelnes Bild -> den ersten angeschlossenen
@@ -100,13 +99,13 @@ class OpenAIBackend(Backend):
     def poll(self, job_id):
         if job_id in self._results:
             return Status(DONE, progress=1.0, result_url="mem://" + job_id)
-        return Status(ERROR, error="OpenAI: unbekannte job_id {j!r}".format(j=job_id))
+        return Status(ERROR, error=format_error("unknown job_id {j!r}".format(j=job_id), "OpenAI"))
 
     def download(self, result_url, target_dir, filename=None):
         job_id = result_url.split("://", 1)[1]
         data = self._results.pop(job_id, None)
         if data is None:
-            raise BackendError("OpenAI: kein Ergebnis für {j!r}".format(j=job_id))
+            raise BackendError(format_error("no result for job {j!r}".format(j=job_id), "OpenAI"))
         if not os.path.isdir(target_dir):
             os.makedirs(target_dir)
         if not filename:
@@ -148,13 +147,13 @@ class OpenAIBackend(Backend):
                 text = r.read().decode("utf-8")
         except HTTPError as exc:
             detail = exc.read().decode("utf-8", "replace") if exc.fp else ""
-            raise BackendError("OpenAI HTTP {c}: {d}".format(c=exc.code, d=detail[:500]))
+            raise BackendError(http_error_message("OpenAI", detail, code=exc.code))
         except URLError as exc:
-            raise BackendError("OpenAI Netzwerkfehler: {r}".format(r=exc.reason))
+            raise BackendError(format_error("network error: {r}".format(r=exc.reason), "OpenAI"))
         try:
             return json.loads(text)
         except ValueError:
-            raise BackendError("OpenAI: ungültiges JSON: {t}".format(t=text[:300]))
+            raise BackendError(format_error("invalid JSON in the response", "OpenAI", text[:300]))
 
 
 def _first_image_bytes(resp):
@@ -164,7 +163,7 @@ def _first_image_bytes(resp):
         b64 = data[0].get("b64_json")
         if b64:
             return base64.b64decode(b64)
-    raise BackendError("OpenAI: kein Bild in der Antwort: {r}".format(r=str(resp)[:300]))
+    raise BackendError(format_error("no image in the response", "OpenAI", str(resp)[:300]))
 
 
 def _encode_multipart(fields, files):

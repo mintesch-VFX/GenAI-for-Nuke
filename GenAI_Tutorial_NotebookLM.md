@@ -70,9 +70,9 @@ own built-in Python does not count** — it's internal and not available as a no
    python install.py
    ```
 3. A small window titled **"GenAI — Installer"** opens. It does four things:
-   - copies the `ai_gen` package into your `~/.nuke/` folder,
+   - copies the `GenAI` package into your `~/.nuke/` folder,
    - adds the **Nodes → GenAI** menu entry to your `~/.nuke/menu.py`,
-   - saves your API keys locally to `~/.nuke/ai_gen_keys.json`,
+   - saves your API keys locally to `~/.nuke/GenAI_keys.json`,
    - stores a **relative output path** worked out from one example shot (section 6).
 4. Enter your **API keys** in the fields (tick "Show keys" to check them).
 5. *(Optional but recommended)* Set the **relative path**: pick one example `.nk`
@@ -82,7 +82,7 @@ own built-in Python does not count** — it's internal and not available as a no
 
 After restarting, the node lives under **Nodes → GenAI**.
 
-> Your keys never leave your machine. The file `~/.nuke/ai_gen_keys.json` is personal —
+> Your keys never leave your machine. The file `~/.nuke/GenAI_keys.json` is personal —
 > **do not share it.** You can re-run `install.py` at any time to change keys or paths.
 
 ## 4. API keys — what you need and where to get it
@@ -101,7 +101,7 @@ Model dropdown**, so you can start with just one provider.
 > upload your input frames and guide videos to a public URL, which the Magnific-based
 > models (Kling, Nano with references) require.
 
-Alternative to the installer: create `~/.nuke/ai_gen_keys.json` by hand:
+Alternative to the installer: create `~/.nuke/GenAI_keys.json` by hand:
 ```json
 {
   "MAGNIFIC_API_KEY": "your-magnific-key",
@@ -160,7 +160,7 @@ pip install opencv-python fal-client imageio-ffmpeg
 They are used to transcode results into frame sequences and to encode/upload guide and
 reference videos (imageio-ffmpeg provides the h264 encoder some models require). The
 node finds this Python automatically via your `PATH`, common install locations, or the
-environment variable `AI_GEN_CV2_PYTHON` pointing at such a `python.exe`.
+environment variable `GENAI_CV2_PYTHON` pointing at such a `python.exe`.
 **Image-only workflows do not need this.**
 
 ## 8. History and reproducing a generation
@@ -183,7 +183,7 @@ The node keeps a history of its recent generations:
 |---------|-------------|
 | **GenAI is not in the Nodes menu** | Restart Nuke after installing. Check that `~/.nuke/menu.py` contains the GenAI snippet. |
 | **A model is missing from the dropdown** | Its API key is not present. Re-run `install.py` and enter the key. |
-| **"No Python with OpenCV / fal_client found"** | Install the video helper packages (section 7) or set `AI_GEN_CV2_PYTHON`. |
+| **"No Python with OpenCV / fal_client found"** | Install the video helper packages (section 7) or set `GENAI_CV2_PYTHON`. |
 | **"User is locked. Exhausted balance"** | Your fal account is out of credit. Top up at fal.ai/dashboard/billing. |
 | **Colors look off** | The node auto-matches the active Viewer transform; make sure your Viewer is set to the look you want *before* generating. |
 

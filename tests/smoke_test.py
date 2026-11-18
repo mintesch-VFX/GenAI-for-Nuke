@@ -9,12 +9,12 @@ import json
 import os
 import sys
 
-# Projekt-Root (Ordner über tests/) auf den Pfad, damit `import ai_gen` klappt.
+# Projekt-Root (Ordner über tests/) auf den Pfad, damit `import GenAI` klappt.
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-from ai_gen import prompt, config
-from ai_gen.backends import fal
+from GenAI import prompt, config
+from GenAI.backends import fal
 
 
 def check(name, cond):
@@ -25,7 +25,7 @@ check.failures = 0
 
 
 print("== manifest.json ==")
-with open(os.path.join(ROOT, "ai_gen", "manifest.json"), encoding="utf-8") as fh:
+with open(os.path.join(ROOT, "GenAI", "manifest.json"), encoding="utf-8") as fh:
     manifest = json.load(fh)
 models = manifest["models"]
 check("manifest lädt, >=1 Modell", len(models) >= 1)
@@ -65,7 +65,7 @@ try:
     check("MissingKeyError geworfen", False)
 except config.MissingKeyError as exc:
     check("MissingKeyError geworfen", True)
-    check("Fehlermeldung nennt Pfad", "ai_gen_keys.json" in str(exc))
+    check("Fehlermeldung nennt Pfad", "GenAI_keys.json" in str(exc))
 
 print()
 if check.failures:

@@ -1,4 +1,5 @@
 # --- Secrets / local keys (NEVER commit) ---
+GenAI_keys.json
 ai_gen_keys.json
 *_keys.json
 *.key
@@ -32,3 +33,4 @@ desktop.ini
 
 # --- Test / generated artifacts ---
 _test_output/
+GenAI_mcp.json

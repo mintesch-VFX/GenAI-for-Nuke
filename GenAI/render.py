@@ -205,6 +205,41 @@ def _fit_pixels(src, max_pixels):
         return None
 
 
+def _fit_sides(src, max_long, max_short, max_pixels=None):
+    """
+    Reformat, das src auf lange Seite <= max_long UND kurze Seite <= max_short (und optional
+    <= max_pixels) runterskaliert (Aspect erhalten, nie hochskalieren). Fuer APIs mit
+    Seitenlimits (z. B. LTX: 3840 x 2160). Liefert die Reformat-Node oder None.
+    """
+    try:
+        fmt = src.format()
+        w, h = fmt.width(), fmt.height()
+        if w <= 0 or h <= 0:
+            return None
+        scale = 1.0
+        if max_long:
+            scale = min(scale, float(max_long) / max(w, h))
+        if max_short:
+            scale = min(scale, float(max_short) / min(w, h))
+        if max_pixels and w * h * scale * scale > max_pixels:
+            scale = (float(max_pixels) / (w * h)) ** 0.5
+        if scale >= 1.0:
+            return None
+        nw = max(2, (int(w * scale) // 2) * 2)
+        nh = max(2, (int(h * scale) // 2) * 2)
+        rf = nuke.nodes.Reformat(inputs=[src])
+        rf["type"].setValue("to box")
+        rf["box_width"].setValue(nw)
+        rf["box_height"].setValue(nh)
+        rf["box_fixed"].setValue(True)
+        rf["resize"].setValue("fit")
+        rf["black_outside"].setValue(False)
+        rf["center"].setValue(True)
+        return rf
+    except Exception:
+        return None
+
+
 def _reformat_to_format(src, target):
     """
     Reformat 'to box' (fill/crop) auf ein EXAKTES Format -> ändert das Aspect
@@ -227,7 +262,8 @@ def _reformat_to_format(src, target):
 
 
 def render_inputs(node, in_dir, video_indices=(), video_range=None, max_pixels=None,
-                  input_format=None):
+                  input_format=None, video_max_pixels=None, plain_names=False, still_dir=None,
+                  video_max_long=None, video_max_short=None):
     """
     Rendert die angeschlossenen Eingänge (Viewer-Look eingebacken) nach in_dir.
     Liefert {index: value}:
@@ -237,6 +273,19 @@ def render_inputs(node, in_dir, video_indices=(), video_range=None, max_pixels=N
 
     video_range: optional (first, last) für Guide-Videos statt der vollen Comp-Range
     (z. B. Kling Omni: Referenz-Video muss zur gewählten Dauer passen, max 10s).
+
+    video_max_pixels: optionales, EIGENES Pixel-Limit nur für Eingänge in
+    video_indices (z. B. Seedance reference_videos: ~2 MP statt der 14 MP, die für
+    Bild-Referenzen gelten) -- Video- und Bild-Eingänge im selben Mode können so
+    unterschiedliche API-Limits respektieren. Ohne Angabe gilt weiter max_pixels
+    für alle Eingänge gleich (bestehendes Verhalten, z. B. Kling Omni).
+
+    plain_names: Standbilder heissen schlicht in1.png..in4.png (1-basiert wie @in1)
+    statt <Zeitstempel>_in<n>.png -- fuer Generate Only, wo alle Eingaenge einer Runde
+    in einem eigenen Ordner liegen.
+
+    still_dir: eigener Zielordner fuer die Standbilder (Default in_dir) -- Generate Only
+    legt so die Video-Frames in einen Temp-Ordner und die Standbilder direkt in den Export-Ordner.
 
     Ein temporärer Write (+ OCIODisplay) wird pro Eingang angelegt, ausgeführt und
     wieder gelöscht — die Node selbst bleibt unangetastet.
@@ -256,12 +305,18 @@ def render_inputs(node, in_dir, video_indices=(), video_range=None, max_pixels=N
             continue
         # Eingang ggf. anpassen: input_format = exaktes Format (Aspect-Crop, z. B.
         # Kling Omni braucht 16:9 statt ultrabreit); sonst max_pixels = nur runter-
-        # skalieren (Aspect erhalten).
+        # skalieren (Aspect erhalten). Video-Eingänge mit eigenem Limit (falls
+        # gesetzt) bekommen video_max_pixels statt des allgemeinen max_pixels.
         head, rf = src, None
+        effective_max_pixels = max_pixels
+        if i in video_indices and video_max_pixels:
+            effective_max_pixels = video_max_pixels
         if input_format:
             rf = _reformat_to_format(src, input_format)
-        elif max_pixels:
-            rf = _fit_pixels(src, max_pixels)
+        elif i in video_indices and (video_max_long or video_max_short):
+            rf = _fit_sides(src, video_max_long, video_max_short, effective_max_pixels)
+        elif effective_max_pixels:
+            rf = _fit_pixels(src, effective_max_pixels)
         if rf is not None:
             head = rf
         ocd = make_ocio_display(head, invert=False)
@@ -283,7 +338,8 @@ def render_inputs(node, in_dir, video_indices=(), video_range=None, max_pixels=N
                 nuke.execute(writer, vfirst, vlast)
                 results[i] = {"seq_dir": seq_dir.replace("\\", "/"), "first": vfirst, "last": vlast, "fps": fps}
             else:
-                path = os.path.join(in_dir, "{s}_in{n}.png".format(s=stamp, n=i)).replace("\\", "/")
+                fname = "in{n}.png".format(n=i + 1) if plain_names else "{s}_in{n}.png".format(s=stamp, n=i)
+                path = os.path.join(still_dir or in_dir, fname).replace("\\", "/")
                 writer["file"].setValue(path)
                 nuke.execute(writer, frame, frame)
                 results[i] = path
