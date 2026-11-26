@@ -36,6 +36,10 @@ class FalBackend(Backend):
     def __init__(self):
         # request_id -> {"status_url": ..., "response_url": ...}
         self._jobs = {}
+        # request_id -> komplettes Ergebnis (fuer Zusatz-Dateien wie raw_depths)
+        self._results = {}
+        # Jobs ohne Float-Depth im Ergebnis (nuke_node wartet dann nicht auf die .npz)
+        self._raw_dropped = set()
 
     # ---- öffentliche Schnittstelle ---------------------------------------------
 
@@ -45,7 +49,8 @@ class FalBackend(Backend):
         # Endpoint kommt bereits aufgelöst rein (aus dem Mode bzw. Fallback).
         endpoint = model_cfg["endpoint"]
 
-        payload = {"prompt": prompt or ""}
+        # Modelle ohne Prompt (z. B. Depth Anything Video): kein prompt-Feld senden.
+        payload = {"prompt": prompt or ""} if model_cfg.get("send_prompt", True) else {}
 
         # Nur die vom Manifest deklarierten API-Parameter senden (UI-Key -> API-Feld).
         # Gilt für Text- UND Edit-Endpoint (beide akzeptieren z. B. aspect_ratio).
@@ -100,7 +105,7 @@ class FalBackend(Backend):
         raw = (data.get("status") or "").upper()
 
         if raw == "COMPLETED":
-            result_url = self._extract_result_url(job, key)
+            result_url = self._extract_result_url(job, key, job_id)
             return Status(DONE, progress=1.0, result_url=result_url)
         if raw == "IN_PROGRESS":
             return Status(RUNNING, progress=_progress_from_logs(data))
@@ -114,9 +119,21 @@ class FalBackend(Backend):
 
     # ---- intern ----------------------------------------------------------------
 
-    def _extract_result_url(self, job, key):
+    def raw_depth_url(self, job_id):
+        """Link auf die Float-Depth-.npz eines fertigen Depth-Jobs ("" = keine).
+        fal liefert sie direkt im Ergebnis (raw_depths.url, bei include_raw_depths=true)."""
+        raw = (self._results.get(job_id) or {}).get("raw_depths")
+        url = raw.get("url") if isinstance(raw, dict) else raw
+        if isinstance(url, str) and url.startswith("https://"):
+            return url
+        self._raw_dropped.add(job_id)   # kommt nicht mehr nach: nicht warten
+        return ""
+
+    def _extract_result_url(self, job, key, job_id=None):
         """Fertiges Ergebnis abrufen und die Medien-URL herausziehen."""
         result = self._request(job["response_url"], key, method="GET")
+        if job_id is not None and isinstance(result, dict):
+            self._results[job_id] = result
         url = _first_media_url(result)
         if not url:
             raise BackendError(format_error("no media URL in the result", "fal", str(result)[:300]))

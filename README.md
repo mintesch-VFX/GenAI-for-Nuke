@@ -43,24 +43,24 @@ Editor).
 No API keys, no other accounts. Credits of your own Magnific account are used — each
 person needs their own login, do not share one.
 
-Everything below is **optional**: your own API keys for the *API* interface or for other
-providers. Enter them in the installer or in the setup window. **Only models whose key
-you entered (or that the Magnific login covers) appear in the Model dropdown.**
+Everything below is **optional**: your own API keys for the few models that exist only in the
+*API* interface (Wan 2.7 Video Edit, Alpha Gen, Upscale). Enter them in the installer or in the
+setup window. **Only models whose key you entered (or that the Magnific login covers) appear in
+the Model dropdown.**
 
 ### Where to get each key
 
 | Key | Needed for | Get it at |
 |-----|------------|-----------|
-| `MAGNIFIC_API_KEY` | Nano Banana, Kling (image + 4K video) | magnific.com → account → **API** |
-| `FAL_KEY` | Seedance, Gemini Omni, **and file uploads** | fal.ai → **Keys** (format `id:secret`) |
+| `MAGNIFIC_API_KEY` | Wan 2.7 Video Edit | magnific.com → account → **API** |
+| `FAL_KEY` | **file uploads** for Wan 2.7 Video Edit | fal.ai → **Keys** (format `id:secret`) |
 | `LTX_API_KEY` | Alpha Gen, Upscale (LTX) | console.ltx.io (LTX **Developer Console**, separate from LTX Studio; buy credits first, min. USD 5) |
-| `OPENAI_API_KEY` | GPT 2 | platform.openai.com → **API keys** |
-| `GOOGLE_API_KEY` | optional (direct Google models) | aistudio.google.com → **Get API key** |
+| `OPENAI_API_KEY` | none at the moment | platform.openai.com → **API keys** |
+| `GOOGLE_API_KEY` | none at the moment | aistudio.google.com → **Get API key** |
 
-> **Note:** In the *API* interface, `FAL_KEY` is also used to upload your input
-> frames/videos to a public URL for the Magnific API models (the Magnific API only takes
-> URLs). Without inputs (text prompt only) it is not needed. The *MCP* interface uploads
-> through Magnific itself and never needs it. The installer adds the `fal-client`
+> **Note:** `FAL_KEY` uploads your input video to a public URL for Wan 2.7 Video Edit (the
+> Magnific API only takes URLs). The *MCP* interface uploads through Magnific itself and never
+> needs it. The installer adds the `fal-client`
 > package only if you enter a fal key.
 
 ### Manual alternative
@@ -102,12 +102,7 @@ Leaving both installer path fields empty keeps option 3 (fully automatic).
 
 | Model | Provider | Type | Notes |
 |-------|----------|------|-------|
-| Nano Banana 2 | Magnific | image | up to 4K, references |
-| GPT 2 | OpenAI | image | up to 4K |
-| Kling 3.0 Pro | Magnific | video (i2v) | native 4K, start/end frames |
-| Kling 3.0 Omni | Magnific | video (v2v) | motion reference video, up to 1080p |
-| Seedance 2.0 | fal | video | references + guide video |
-| Gemini Omni Flash | fal | video | video-to-video edit, 720p |
+| Wan 2.7 Video Edit | Magnific API | video -> video | **API interface**, needs `MAGNIFIC_API_KEY` + `FAL_KEY` |
 | Alpha Gen | LTX | video -> matte | `in1` = video over the comp range (max 3072 frames, up to 3840x2160). Result = grayscale matte as sequence; the ProRes 4444 cutout `.mov` (alpha) is saved next to it in `GenAI/DOWNLOAD`. USD 0.10 / 0.25 / 1.00 per input second (short side up to 1080 / 1440 / 2160) |
 | Upscale | LTX | video -> video | `in1` = video; mode = target 1080p / 4K / 8K (USD 0.08 / 0.30 / 1.20 per input second; max ~80 s / 20 s / 8 s) |
 | Generate Only | local | export | no API call: writes in1..in4 into one new folder `GenAI/UPLOAD/<date_time>_<node name>/` — mode **Video** = `in1.mp4` over the comp range (comp fps) plus `in2..in4.png` from the current frame (in1 is always the video), mode **Still frame** = `in1.png..` from the current frame (the single frames are deleted after encoding) |
@@ -115,20 +110,26 @@ Leaving both installer path fields empty keeps option 3 (fully automatic).
 ### Interface: API or MCP
 
 The **MCP / API** dropdown right next to *Model* switches the *Model* list between
-**MCP** (Magnific's MCP server, the default) and **API** (REST / direct APIs: fal, OpenAI, Magnific
-API key, LTX). Image models are listed first, "Generate Only" is in both lists. Without a Magnific MCP
-login new nodes start in API.
+**MCP** (Magnific's MCP server, the default) and **API**. The API list holds only what MCP does not
+offer: **Wan 2.7 Video Edit** (Magnific API key), **Alpha Gen** and **Upscale** (LTX key); "Generate
+Only" is in both lists. All other models (Seedance, Kling, Gemini Omni, MiniMax, GPT, Nano Banana,
+Seedream) are MCP-only; nodes that still carry an old API entry of one of them switch to the MCP
+model automatically when the script opens.
 
-MCP models: GPT 2.6, Nano Banana 2.1, Seedream 5.5 / 5 Pro (images); Kling 4.0 / 4.0 Flash,
-Seedance 2.5 / 2.0, Gemini Omni 1.2 Flash (video). **Video Modify** is the mode **Modify** of each video
+MCP models: GPT 2.6, Nano Banana 2.1, Seedream 5.5 / 5 Pro (images); Seedance 2.5 / 2.0, Kling 4.0 /
+4.0 Flash / 3.0, Gemini Omni 1.2 Flash, MiniMax H3 (video), Video Depth. **Video Modify** is the mode **Modify** of each video
 model (default mode of Kling 4.0): `in1` = footage over the comp frame range, `in2..in4` = reference
 images; the result keeps length and fps.
 
 **Video Depth** (MCP, Video Depth Anything): `in1` = footage over the comp frame range (max 30 s /
 200 MB). Result = a per-frame, temporally consistent depth video with the same length and fps
 (near = bright, far = dark). The Mode picks the colormap: **Grayscale** (for compositing), Turbo,
-Inferno, Viridis. No prompt, no extra key — it uses the Magnific login. The result is an 8-bit video,
-not float depth.
+Inferno, Viridis. No prompt, no extra key — it uses the Magnific login. Those results are 8-bit videos.
+Mode **Float (EXR)** returns the float depth instead: an EXR sequence (`R=G=B`, relative depth, near =
+high like `depth.Z`, not metres) without banding, for ZDefocus and similar. It is big (~25 MB per 1080p
+frame) and Magnific keeps the float data only a few minutes, so Nuke downloads it right after the job
+(`GenAI/DOWNLOAD/<job>_depth_exr/depth.####.exr`). If the server has no float data you get the 8-bit
+video and a note. No Display-transform is applied to it.
 
 * **Login:** the setup window (opens by itself on first use) > Anmelden — confirm the code once in the browser
   (OAuth, no API key). The session lasts ~30 days and renews itself while you use it

@@ -70,10 +70,10 @@ def install_video_helpers(python_exe, with_fal=False):
 
 
 KEY_FIELDS = [
-    ("MAGNIFIC_API_KEY", "Magnific API Key", "Magnific in API mode (instead of the login)  ·  magnific.com > API"),
-    ("FAL_KEY", "fal Key", "API mode: needed when images/video are sent as input, and for Seedance 2 / Gemini Omni / Kling 4.0 (API)  ·  fal.ai"),
-    ("OPENAI_API_KEY", "OpenAI API Key", "GPT 2 in API mode  ·  platform.openai.com"),
-    ("GOOGLE_API_KEY", "Google AI Studio Key", "optional  ·  aistudio.google.com"),
+    ("MAGNIFIC_API_KEY", "Magnific API Key", "Wan 2.7 Video Edit in API mode (instead of the login)  ·  magnific.com > API"),
+    ("FAL_KEY", "fal Key", "Only for Wan 2.7 Video Edit (API): fal.ai hosts the uploaded video, the Magnific API only takes URLs  ·  fal.ai"),
+    ("OPENAI_API_KEY", "OpenAI API Key", "no model uses this key at the moment  ·  platform.openai.com"),
+    ("GOOGLE_API_KEY", "Google AI Studio Key", "no model uses this key at the moment  ·  aistudio.google.com"),
     ("LTX_API_KEY", "LTX API Key", "Alpha Gen, Upscale  ·  console.ltx.io (Developer Console)"),
 ]
 

@@ -1,1339 +1,270 @@
 {
   "models": [
     {
-      "id": "nano_banana_2",
-      "label": "Nano Banana 2",
+      "id": "gpt_2_6_mcp",
+      "label": "GPT 2.6",
       "type": "image",
-      "backend": "magnific",
-      "endpoint": "text-to-image/nano-banana-pro-flash",
-      "legal": "green",
-      "eta_sec": 40,
+      "backend": "magnific_mcp",
+      "mcp_tool": "images_generate",
+      "mcp_slug": "gpt-2-6",
+      "endpoint": "images_generate",
+      "legal": "yellow",
+      "legal_note": "Magnific MCP laeuft ueber den persoenlichen Magnific-Login, NICHT ueber den Enterprise-Key. Ob die Enterprise-MSA-Zusagen (Output-Ownership, kein Training) dafuer gelten, vorher klaeren.",
+      "eta_sec": 60,
       "output_ext": "png",
-      "hint": "in1..in4 = reference images (optional)",
+      "max_input_pixels": 14000000,
+      "cost": {
+        "unit": "usd",
+        "note": "Magnific MCP: credits of YOUR logged-in Magnific account (Unlimited does not apply) -- see the account in Magnific"
+      },
+      "hint": "in1..in4 = reference images (optional). Prompt can use @in1..@in4.",
       "input_map": [
         {
-          "field": "reference_images",
-          "list": true,
-          "wrap": "image",
-          "wrap_static": {
-            "mime_type": "image/png"
-          }
+          "role": "reference",
+          "type": "image"
         },
         {
-          "field": "reference_images",
-          "list": true,
-          "wrap": "image",
-          "wrap_static": {
-            "mime_type": "image/png"
-          }
+          "role": "reference",
+          "type": "image"
         },
         {
-          "field": "reference_images",
-          "list": true,
-          "wrap": "image",
-          "wrap_static": {
-            "mime_type": "image/png"
-          }
+          "role": "reference",
+          "type": "image"
         },
         {
-          "field": "reference_images",
-          "list": true,
-          "wrap": "image",
-          "wrap_static": {
-            "mime_type": "image/png"
-          }
+          "role": "reference",
+          "type": "image"
         }
       ],
       "aspect_ratios": [
         "16:9",
         "9:16",
-        "1:1"
+        "1:1",
+        "21:9",
+        "4:3",
+        "3:4",
+        "3:2",
+        "2:3"
       ],
       "default_aspect_ratio": "16:9",
       "resolutions": [
-        "1K",
-        "2K",
-        "4K"
+        "1k",
+        "2k",
+        "4k"
       ],
-      "default_resolution": "2K",
+      "default_resolution": "2k",
       "api_params": {
-        "aspect_ratio": "aspect_ratio",
+        "aspect_ratio": "aspectRatio",
         "resolution": "resolution"
       },
-      "cost": {
-        "unit": "cr",
-        "per_image": {
-          "1K": 75,
-          "2K": 75,
-          "4K": 150
+      "api_static": {
+        "count": 1,
+        "extraSettings": {
+          "quality": "high",
+          "variant": "sunburst"
         }
       },
       "legacy_labels": [
-        "Nano Banana 2 (Image)"
-      ]
-    },
-    {
-      "id": "gpt_image",
-      "label": "GPT 2",
-      "type": "image",
-      "providers": [
-        {
-          "name": "openai",
-          "backend": "openai",
-          "openai_model": "gpt-image-2.5-sunburst",
-          "endpoint": "generations",
-          "edit_endpoint": "edits",
-          "legal": "green",
-          "eta_sec": 25,
-          "output_ext": "png",
-          "hint": "in1 = image to edit (optional)",
-          "input_map": [
-            {
-              "field": "image"
-            }
-          ],
-          "aspect_ratios": [
-            "16:9",
-            "9:16",
-            "1:1"
-          ],
-          "default_aspect_ratio": "16:9",
-          "resolutions": [
-            "2K",
-            "4K"
-          ],
-          "default_resolution": "2K",
-          "api_params": {},
-          "cost": {
-            "unit": "usd",
-            "note": "GPT Image 2.5 Sunburst (OpenAI), Quality fest auf high -- teurer als die frueheren Schaetzwerte (~$0.08 2K / ~$0.15 4K bei abgestufter Quality); aktuelle Preise: platform.openai.com/docs/pricing"
-          }
-        },
-        {
-          "name": "magnific",
-          "backend": "magnific",
-          "legal": "green",
-          "legal_note": "Magnific Enterprise MSA: Output-Ownership, IP-Indemnification, keine Nutzung von Inputs/Outputs fuers Modelltraining.",
-          "eta_sec": 60,
-          "output_ext": "png",
-          "modes": [
-            {
-              "label": "Text -> Image",
-              "endpoint": "text-to-image/gpt-image-2-5",
-              "hint": "keine Inputs, nur Prompt.",
-              "input_map": []
-            },
-            {
-              "label": "Reference -> Image (Edit)",
-              "endpoint": "text-to-image/gpt-image-2-5-edit",
-              "hint": "in1..in4 = Referenzbilder (bis zu 4, API kann 16). Prompt kann @in1..@in4 nutzen.",
-              "input_map": [
-                {
-                  "field": "reference_images",
-                  "list": true
-                },
-                {
-                  "field": "reference_images",
-                  "list": true
-                },
-                {
-                  "field": "reference_images",
-                  "list": true
-                },
-                {
-                  "field": "reference_images",
-                  "list": true
-                }
-              ]
-            }
-          ],
-          "default_mode": "Reference -> Image (Edit)",
-          "aspect_ratios": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "21:9",
-            "4:3",
-            "3:4"
-          ],
-          "default_aspect_ratio": "16:9",
-          "resolutions": [
-            "1K",
-            "2K",
-            "4K"
-          ],
-          "default_resolution": "2K",
-          "api_params": {
-            "aspect_ratio": "aspect_ratio",
-            "resolution": "resolution"
-          },
-          "api_static": {
-            "quality": "high",
-            "variant": "sunburst"
-          },
-          "api_value_maps": {
-            "aspect_ratio": {
-              "16:9": "widescreen_16_9",
-              "9:16": "social_story_9_16",
-              "1:1": "square_1_1",
-              "21:9": "film_horizontal_21_9",
-              "4:3": "classic_4_3",
-              "3:4": "traditional_3_4"
-            },
-            "resolution": {
-              "1K": "1k",
-              "2K": "2k",
-              "4K": "4k"
-            }
-          },
-          "cost": {
-            "unit": "cr",
-            "note": "Magnific-Credits, Preis siehe magnific.com/pricing"
-          }
-        }
-      ],
-      "legacy_labels": [
+        "GPT 2.6 (Image, MCP)",
+        "GPT 2.5 (Image, MCP)",
+        "GPT 2",
         "GPT 2 (Image)"
       ]
     },
     {
-      "id": "seedream_v5_pro",
-      "label": "Seedream v5 Pro",
+      "id": "nano_banana_2_1_mcp",
+      "label": "Nano Banana 2.1",
       "type": "image",
-      "backend": "magnific",
-      "endpoint": "text-to-image/seedream-v5-pro",
-      "legal": "green",
-      "legal_note": "Magnific Enterprise MSA: Output-Ownership, IP-Indemnification, keine Nutzung von Inputs/Outputs fuers Modelltraining.",
-      "eta_sec": 25,
-      "output_ext": "png",
-      "modes": [
-        {
-          "label": "Text -> Image",
-          "endpoint": "text-to-image/seedream-v5-pro",
-          "hint": "keine Inputs, nur Prompt.",
-          "input_map": []
-        },
-        {
-          "label": "Reference -> Image (Edit)",
-          "endpoint": "text-to-image/seedream-v5-pro-edit",
-          "hint": "in1..in4 = Referenzbilder (bis zu 4, API kann 10). Prompt kann @in1..@in4 nutzen.",
-          "input_map": [
-            {
-              "field": "reference_images",
-              "list": true
-            },
-            {
-              "field": "reference_images",
-              "list": true
-            },
-            {
-              "field": "reference_images",
-              "list": true
-            },
-            {
-              "field": "reference_images",
-              "list": true
-            }
-          ]
-        }
-      ],
-      "default_mode": "Reference -> Image (Edit)",
-      "aspect_ratios": [
-        "16:9",
-        "9:16",
-        "1:1",
-        "21:9",
-        "4:3",
-        "3:4"
-      ],
-      "default_aspect_ratio": "16:9",
-      "resolutions": [
-        "1.5K",
-        "2K"
-      ],
-      "default_resolution": "2K",
-      "api_params": {
-        "aspect_ratio": "aspect_ratio",
-        "resolution": "resolution"
-      },
-      "api_value_maps": {
-        "aspect_ratio": {
-          "16:9": "widescreen_16_9",
-          "9:16": "social_story_9_16",
-          "1:1": "square_1_1",
-          "21:9": "cinematic_21_9",
-          "4:3": "classic_4_3",
-          "3:4": "traditional_3_4"
-        },
-        "resolution": {
-          "1.5K": "1.5k",
-          "2K": "2k"
-        }
-      },
-      "cost": {
-        "unit": "cr",
-        "note": "Magnific-Credits, Preis siehe magnific.com/pricing"
-      },
-      "legacy_labels": [
-        "Seedream v5 Pro (Image)"
-      ]
-    },
-    {
-      "id": "seedance_2",
-      "label": "Seedance 2",
-      "type": "video",
-      "providers": [
-        {
-          "name": "fal",
-          "backend": "fal",
-          "endpoint": "bytedance/seedance-2.0/text-to-video",
-          "legal": "yellow",
-          "eta_sec": 90,
-          "output_ext": "mp4",
-          "max_input_pixels": 14000000,
-          "guide_fps": 24,
-          "modes": [
-            {
-              "label": "Image -> Video",
-              "endpoint": "bytedance/seedance-2.0/image-to-video",
-              "hint": "in1 = start frame, in2 = end frame",
-              "input_map": [
-                {
-                  "field": "image_url"
-                },
-                {
-                  "field": "end_image_url"
-                }
-              ]
-            },
-            {
-              "label": "Reference -> Video",
-              "endpoint": "bytedance/seedance-2.0/reference-to-video",
-              "hint": "in1 = reference video, in2..in4 = reference images. Duration follows the reference video length.",
-              "duration_follows_ref_video": true,
-              "input_map": [
-                {
-                  "field": "video_urls",
-                  "list": true,
-                  "video": true
-                },
-                {
-                  "field": "image_urls",
-                  "list": true
-                },
-                {
-                  "field": "image_urls",
-                  "list": true
-                },
-                {
-                  "field": "image_urls",
-                  "list": true
-                }
-              ]
-            },
-            {
-              "label": "Text -> Video",
-              "endpoint": "bytedance/seedance-2.0/text-to-video",
-              "hint": "no inputs; prompt only",
-              "input_map": []
-            }
-          ],
-          "default_mode": "Reference -> Video",
-          "aspect_ratios": [
-            "16:9",
-            "9:16",
-            "1:1"
-          ],
-          "default_aspect_ratio": "16:9",
-          "resolutions": [
-            "480p",
-            "720p",
-            "1080p",
-            "4k"
-          ],
-          "default_resolution": "1080p",
-          "durations": [
-            "auto",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "10",
-            "11",
-            "12",
-            "13",
-            "14",
-            "15"
-          ],
-          "default_duration": "5",
-          "api_params": {
-            "aspect_ratio": "aspect_ratio",
-            "resolution": "resolution",
-            "duration": "duration"
-          },
-          "api_static": {
-            "generate_audio": false
-          },
-          "cost": {
-            "unit": "usd",
-            "note": "~$0.06/s at 720p (fal), more at 1080p/4k"
-          }
-        },
-        {
-          "name": "magnific",
-          "backend": "magnific",
-          "endpoint": "video/seedance-2-pro-1080p",
-          "status_endpoint": "video/seedance-2-pro",
-          "resolution_endpoints": {
-            "480p": "video/seedance-2-pro-480p",
-            "720p": "video/seedance-2-pro-720p",
-            "1080p": "video/seedance-2-pro-1080p",
-            "4K": "video/seedance-2-pro-4k"
-          },
-          "legal": "green",
-          "legal_note": "Magnific Enterprise MSA: Output-Ownership, IP-Indemnification, keine Nutzung von Inputs/Outputs fuers Modelltraining.",
-          "eta_sec": 120,
-          "max_input_pixels": 14000000,
-          "output_ext": "mp4",
-          "modes": [
-            {
-              "label": "Image -> Video",
-              "hint": "in1 = start frame (optional), in2 = end frame (optional). Ohne Inputs = text-to-video.",
-              "input_map": [
-                {
-                  "field": "image"
-                },
-                {
-                  "field": "image_end"
-                }
-              ]
-            },
-            {
-              "label": "Reference -> Video",
-              "hint": "in1 = Referenzvideo (2-15s, wird auf ~2MP verkleinert), in2..in4 = Referenzbilder (bis zu 4). Prompt kann @in1..@in4 nutzen. Dauer folgt automatisch der Laenge des Referenzvideos.",
-              "input_map": [
-                {
-                  "field": "reference_videos",
-                  "list": true,
-                  "video": true
-                },
-                {
-                  "field": "reference_images",
-                  "list": true
-                },
-                {
-                  "field": "reference_images",
-                  "list": true
-                },
-                {
-                  "field": "reference_images",
-                  "list": true
-                }
-              ],
-              "video_max_pixels": 2000000,
-              "video_ref_duration_bounds": [
-                2,
-                15
-              ],
-              "duration_follows_ref_video": true
-            },
-            {
-              "label": "Text -> Video",
-              "hint": "keine Inputs, nur Prompt.",
-              "input_map": []
-            }
-          ],
-          "default_mode": "Reference -> Video",
-          "aspect_ratios": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "21:9",
-            "4:3"
-          ],
-          "default_aspect_ratio": "16:9",
-          "resolutions": [
-            "480p",
-            "720p",
-            "1080p",
-            "4K"
-          ],
-          "default_resolution": "1080p",
-          "durations": [
-            "5",
-            "10"
-          ],
-          "default_duration": "5",
-          "int_params": [
-            "duration"
-          ],
-          "api_params": {
-            "aspect_ratio": "aspect_ratio",
-            "duration": "duration"
-          },
-          "api_value_maps": {
-            "aspect_ratio": {
-              "16:9": "widescreen_16_9",
-              "9:16": "social_story_9_16",
-              "1:1": "square_1_1",
-              "21:9": "film_horizontal_21_9",
-              "4:3": "classic_4_3"
-            }
-          },
-          "cost": {
-            "unit": "cr",
-            "note": "Magnific-Credits, Preis siehe magnific.com/pricing"
-          }
-        }
-      ],
-      "legacy_labels": [
-        "Seedance 2 (Video)"
-      ]
-    },
-    {
-      "id": "seedance_2_5_pro",
-      "label": "Seedance 2.5 Pro",
-      "type": "video",
-      "backend": "magnific",
-      "endpoint": "video/seedance-2-5-pro-1080p",
-      "resolution_endpoints": {
-        "480p": "video/seedance-2-5-pro-480p",
-        "720p": "video/seedance-2-5-pro-720p",
-        "1080p": "video/seedance-2-5-pro-1080p"
-      },
-      "legal": "green",
-      "legal_note": "Magnific Enterprise MSA: Output-Ownership, IP-Indemnification, keine Nutzung von Inputs/Outputs fuers Modelltraining.",
-      "eta_sec": 150,
-      "output_ext": "mp4",
-      "max_input_pixels": 14000000,
-      "modes": [
-        {
-          "label": "Image -> Video",
-          "hint": "in1 = start frame (optional), in2 = end frame (optional). Ohne Inputs = text-to-video.",
-          "input_map": [
-            {
-              "field": "image"
-            },
-            {
-              "field": "image_end"
-            }
-          ]
-        },
-        {
-          "label": "Reference -> Video",
-          "hint": "in1 = Referenzvideo (wird auf ~2MP verkleinert), in2..in4 = Referenzbilder (bis zu 3). Prompt kann @in1..@in4 nutzen. Dauer folgt automatisch der Laenge des Referenzvideos (kuerzere Referenz: letztes Bild wird gehalten). Reference-Audio/Multishot der API sind ueber die Node (noch) nicht nutzbar.",
-          "input_map": [
-            {
-              "field": "reference_videos",
-              "list": true,
-              "video": true
-            },
-            {
-              "field": "reference_images",
-              "list": true
-            },
-            {
-              "field": "reference_images",
-              "list": true
-            },
-            {
-              "field": "reference_images",
-              "list": true
-            }
-          ],
-          "video_max_pixels": 2000000,
-          "video_ref_duration_bounds": [
-            2,
-            15
-          ],
-          "duration_follows_ref_video": true
-        },
-        {
-          "label": "Reference images -> Video",
-          "hint": "in1..in4 = Referenzbilder (bis zu 4, KEIN Video). Prompt kann @in1..@in4 nutzen. Reference-Audio/Multishot der API sind ueber die Node (noch) nicht nutzbar.",
-          "input_map": [
-            {
-              "field": "reference_images",
-              "list": true
-            },
-            {
-              "field": "reference_images",
-              "list": true
-            },
-            {
-              "field": "reference_images",
-              "list": true
-            },
-            {
-              "field": "reference_images",
-              "list": true
-            }
-          ]
-        },
-        {
-          "label": "Text -> Video",
-          "hint": "keine Inputs, nur Prompt.",
-          "input_map": []
-        }
-      ],
-      "default_mode": "Reference -> Video",
-      "aspect_ratios": [
-        "16:9",
-        "9:16",
-        "1:1",
-        "21:9",
-        "4:3",
-        "3:4"
-      ],
-      "default_aspect_ratio": "16:9",
-      "resolutions": [
-        "480p",
-        "720p",
-        "1080p"
-      ],
-      "default_resolution": "1080p",
-      "durations": [
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",
-        "10",
-        "11",
-        "12",
-        "13",
-        "14",
-        "15",
-        "16",
-        "17",
-        "18",
-        "19",
-        "20",
-        "21",
-        "22",
-        "23",
-        "24",
-        "25",
-        "26",
-        "27",
-        "28",
-        "29",
-        "30"
-      ],
-      "default_duration": "5",
-      "int_params": [
-        "duration"
-      ],
-      "api_params": {
-        "aspect_ratio": "aspect_ratio",
-        "duration": "duration"
-      },
-      "api_value_maps": {
-        "aspect_ratio": {
-          "16:9": "widescreen_16_9",
-          "9:16": "social_story_9_16",
-          "1:1": "square_1_1",
-          "21:9": "film_horizontal_21_9",
-          "4:3": "classic_4_3",
-          "3:4": "traditional_3_4"
-        }
-      },
-      "cost": {
-        "unit": "cr",
-        "note": "Magnific-Credits, Preis siehe magnific.com/pricing — laenger/mehr Sound = mehr Credits"
-      },
-      "legacy_labels": [
-        "Seedance 2.5 Pro (Video, Magnific)"
-      ]
-    },
-    {
-      "id": "gemini_omni",
-      "label": "Gemini Omni Flash 1.2",
-      "type": "video",
-      "backend": "fal",
-      "endpoint": "google/gemini-omni-flash/v1.2/text-to-video",
+      "backend": "magnific_mcp",
+      "mcp_tool": "images_generate",
+      "mcp_slug": "imagen-nano-banana-2-1",
+      "endpoint": "images_generate",
       "legal": "yellow",
-      "eta_sec": 60,
-      "output_ext": "mp4",
-      "guide_fps": 24,
-      "int_params": [
-        "duration"
-      ],
-      "modes": [
-        {
-          "label": "Image -> Video",
-          "endpoint": "google/gemini-omni-flash/v1.2/image-to-video",
-          "hint": "in1 = start frame, in2 = end frame (optional, interpoliert dazwischen; mit Endframe max 10s)",
-          "input_map": [
-            {
-              "field": "image_url"
-            },
-            {
-              "field": "end_image_url"
-            }
-          ]
-        },
-        {
-          "label": "Reference -> Video",
-          "endpoint": "google/gemini-omni-flash/v1.2/reference-to-video",
-          "hint": "in1 = Referenzvideo (bis 15s, fuer Charakter-/Szenen-Konsistenz), in2..in4 = Referenzbilder. Prompt kann @in1..@in4 nutzen.",
-          "input_map": [
-            {
-              "field": "reference_video_urls",
-              "list": true,
-              "video": true
-            },
-            {
-              "field": "image_urls",
-              "list": true
-            },
-            {
-              "field": "image_urls",
-              "list": true
-            },
-            {
-              "field": "image_urls",
-              "list": true
-            }
-          ],
-          "video_ref_duration_bounds": [
-            1,
-            15
-          ]
-        },
-        {
-          "label": "Video Edit",
-          "endpoint": "google/gemini-omni-flash/v1.2/edit",
-          "hint": "in1 = Quellvideo (max 15s, video-to-video)",
-          "input_map": [
-            {
-              "field": "video_url",
-              "video": true
-            }
-          ],
-          "api_params": {
-            "resolution": "resolution"
-          }
-        },
-        {
-          "label": "Text -> Video",
-          "endpoint": "google/gemini-omni-flash/v1.2/text-to-video",
-          "hint": "no inputs; prompt only",
-          "input_map": []
-        }
-      ],
-      "default_mode": "Reference -> Video",
-      "aspect_ratios": [
-        "16:9",
-        "9:16"
-      ],
-      "default_aspect_ratio": "16:9",
-      "resolutions": [
-        "360p",
-        "720p",
-        "1080p",
-        "4k"
-      ],
-      "default_resolution": "720p",
-      "durations": [
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",
-        "10",
-        "11",
-        "12",
-        "13",
-        "14",
-        "15"
-      ],
-      "default_duration": "8",
-      "api_params": {
-        "aspect_ratio": "aspect_ratio",
-        "resolution": "resolution",
-        "duration": "duration"
-      },
+      "legal_note": "Magnific MCP laeuft ueber den persoenlichen Magnific-Login, NICHT ueber den Enterprise-Key. Ob die Enterprise-MSA-Zusagen (Output-Ownership, kein Training) dafuer gelten, vorher klaeren.",
+      "eta_sec": 45,
+      "output_ext": "png",
+      "max_input_pixels": 14000000,
       "cost": {
         "unit": "usd",
-        "note": "~$0.10–0.30 / clip (720p, fal); 4K teurer"
+        "note": "Magnific MCP: credits of YOUR logged-in Magnific account (Unlimited does not apply) -- see the account in Magnific"
       },
-      "legacy_labels": [
-        "Gemini Omni Flash 1.2 (Video)"
-      ]
-    },
-    {
-      "id": "minimax_h3",
-      "label": "MiniMax H3",
-      "type": "video",
-      "providers": [
-        {
-          "name": "fal",
-          "backend": "fal",
-          "endpoint": "minimax/h3/text-to-video",
-          "legal": "yellow",
-          "eta_sec": 120,
-          "output_ext": "mp4",
-          "max_input_pixels": 13000000,
-          "guide_fps": 24,
-          "int_params": [
-            "duration"
-          ],
-          "modes": [
-            {
-              "label": "Image -> Video",
-              "endpoint": "minimax/h3/image-to-video",
-              "hint": "in1 = start frame, in2 = end frame (optional). Seitenverhaeltnis kommt vom Bild.",
-              "input_map": [
-                {
-                  "field": "image_url"
-                },
-                {
-                  "field": "end_image_url"
-                }
-              ],
-              "aspect_ratios": [],
-              "api_params": {
-                "resolution": "resolution",
-                "duration": "duration"
-              }
-            },
-            {
-              "label": "Reference -> Video",
-              "endpoint": "minimax/h3/reference-to-video",
-              "hint": "in1 = Referenzvideo (2-15s), in2..in4 = Referenzbilder. Prompt kann @in1..@in4 nutzen.",
-              "input_map": [
-                {
-                  "field": "reference_video_urls",
-                  "list": true,
-                  "video": true
-                },
-                {
-                  "field": "reference_image_urls",
-                  "list": true
-                },
-                {
-                  "field": "reference_image_urls",
-                  "list": true
-                },
-                {
-                  "field": "reference_image_urls",
-                  "list": true
-                }
-              ],
-              "video_ref_duration_bounds": [
-                2,
-                15
-              ],
-              "aspect_ratios": [
-                "adaptive",
-                "16:9",
-                "9:16",
-                "1:1",
-                "21:9",
-                "4:3",
-                "3:4"
-              ],
-              "default_aspect_ratio": "adaptive"
-            },
-            {
-              "label": "Text -> Video",
-              "endpoint": "minimax/h3/text-to-video",
-              "hint": "no inputs; prompt only",
-              "input_map": []
-            }
-          ],
-          "default_mode": "Reference -> Video",
-          "aspect_ratios": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "21:9",
-            "4:3",
-            "3:4"
-          ],
-          "default_aspect_ratio": "16:9",
-          "resolutions": [
-            "480P",
-            "768P",
-            "2K",
-            "4K"
-          ],
-          "default_resolution": "2K",
-          "durations": [
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "10",
-            "11",
-            "12",
-            "13",
-            "14",
-            "15"
-          ],
-          "default_duration": "5",
-          "api_params": {
-            "aspect_ratio": "aspect_ratio",
-            "resolution": "resolution",
-            "duration": "duration"
-          },
-          "cost": {
-            "unit": "usd",
-            "note": "fal: ~$0.05/s (480P), $0.06/s (768P), $0.13/s (2K), $0.16/s (4K)"
-          }
-        },
-        {
-          "name": "magnific",
-          "backend": "magnific",
-          "endpoint": "video/minimax-h3-2k",
-          "resolution_endpoints": {
-            "768p": "video/minimax-h3-768p",
-            "2K": "video/minimax-h3-2k"
-          },
-          "legal": "green",
-          "legal_note": "Magnific Enterprise MSA: Output-Ownership, IP-Indemnification, keine Nutzung von Inputs/Outputs fuers Modelltraining.",
-          "eta_sec": 150,
-          "output_ext": "mp4",
-          "max_input_pixels": 13000000,
-          "guide_fps": 24,
-          "int_params": [
-            "duration"
-          ],
-          "modes": [
-            {
-              "label": "Image -> Video",
-              "hint": "in1 = start frame (optional), in2 = end frame (optional). Ohne Inputs = text-to-video.",
-              "input_map": [
-                {
-                  "field": "image"
-                },
-                {
-                  "field": "image_end"
-                }
-              ]
-            },
-            {
-              "label": "Reference -> Video",
-              "hint": "in1 = Referenzvideo (2-15s), in2..in4 = Referenzbilder. Prompt kann @in1..@in4 nutzen.",
-              "input_map": [
-                {
-                  "field": "reference_videos",
-                  "list": true,
-                  "video": true
-                },
-                {
-                  "field": "reference_images",
-                  "list": true
-                },
-                {
-                  "field": "reference_images",
-                  "list": true
-                },
-                {
-                  "field": "reference_images",
-                  "list": true
-                }
-              ],
-              "video_ref_duration_bounds": [
-                2,
-                15
-              ]
-            },
-            {
-              "label": "Text -> Video",
-              "hint": "keine Inputs, nur Prompt.",
-              "input_map": []
-            }
-          ],
-          "default_mode": "Reference -> Video",
-          "aspect_ratios": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "21:9",
-            "4:3",
-            "3:4"
-          ],
-          "default_aspect_ratio": "16:9",
-          "resolutions": [
-            "768p",
-            "2K"
-          ],
-          "default_resolution": "2K",
-          "durations": [
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "10",
-            "11",
-            "12",
-            "13",
-            "14",
-            "15"
-          ],
-          "default_duration": "5",
-          "api_params": {
-            "aspect_ratio": "aspect_ratio",
-            "duration": "duration"
-          },
-          "api_value_maps": {
-            "aspect_ratio": {
-              "16:9": "widescreen_16_9",
-              "9:16": "social_story_9_16",
-              "1:1": "square_1_1",
-              "21:9": "film_horizontal_21_9",
-              "4:3": "classic_4_3",
-              "3:4": "traditional_3_4"
-            }
-          },
-          "cost": {
-            "unit": "cr",
-            "note": "Magnific-Credits, Preis siehe magnific.com/pricing. Hinweis: H3 ist im Magnific-Katalog als 'private' markiert, evtl. nicht fuer jeden Account freigeschaltet."
-          }
-        }
-      ],
-      "legacy_labels": [
-        "MiniMax H3 (Video)"
-      ]
-    },
-    {
-      "id": "wan_2_7_edit",
-      "label": "Wan 2.7 Video Edit",
-      "type": "video",
-      "backend": "magnific",
-      "endpoint": "video-edit/wan-2-7",
-      "requires_input": true,
-      "legal": "green",
-      "legal_note": "Magnific Enterprise MSA: Output-Ownership, IP-Indemnification, keine Nutzung von Inputs/Outputs fuers Modelltraining.",
-      "eta_sec": 240,
-      "output_ext": "mp4",
-      "hint": "in1 = Quellvideo (2-10s, bleibt in Laenge/Bewegung erhalten), in2..in4 = Referenz-/Stilbilder (optional). Prompt beschreibt nur die Aenderung (Referenzbilder: sagen, wie sie angewendet werden). Seitenverhaeltnis folgt dem Quellvideo.",
-      "max_input_pixels": 4000000,
-      "video_max_pixels": 2100000,
-      "video_ref_duration_bounds": [
-        2,
-        10
-      ],
-      "guide_fps": 24,
+      "hint": "in1..in4 = reference images (optional). Prompt can use @in1..@in4.",
       "input_map": [
         {
-          "field": "video_url",
-          "video": true
+          "role": "reference",
+          "type": "image"
         },
         {
-          "field": "image_urls",
-          "list": true
+          "role": "reference",
+          "type": "image"
         },
         {
-          "field": "image_urls",
-          "list": true
+          "role": "reference",
+          "type": "image"
         },
         {
-          "field": "image_urls",
-          "list": true
+          "role": "reference",
+          "type": "image"
         }
       ],
-      "aspect_ratios": [],
-      "resolutions": [
-        "720P",
-        "1080P"
+      "aspect_ratios": [
+        "16:9",
+        "9:16",
+        "1:1",
+        "21:9",
+        "4:3",
+        "3:4",
+        "3:2",
+        "2:3"
       ],
-      "default_resolution": "1080P",
+      "default_aspect_ratio": "16:9",
+      "resolutions": [
+        "1k",
+        "2k",
+        "4k"
+      ],
+      "default_resolution": "2k",
       "api_params": {
+        "aspect_ratio": "aspectRatio",
         "resolution": "resolution"
       },
       "api_static": {
-        "duration": 0,
-        "additional_settings": {
-          "audio_setting": "auto",
-          "prompt_extend": false
-        }
-      },
-      "cost": {
-        "unit": "cr",
-        "note": "Magnific-Credits, Preis siehe magnific.com/pricing"
+        "count": 1
       },
       "legacy_labels": [
-        "Wan 2.7 Video Edit (Video)"
+        "Nano Banana 2.1 (Image, MCP)",
+        "Nano Banana 2 (Image, MCP)",
+        "Nano Banana 2",
+        "Nano Banana 2 (Image)"
       ]
     },
     {
-      "id": "kling_4",
-      "label": "Kling 4.0",
-      "type": "video",
-      "backend": "fal",
-      "endpoint": "fal-ai/kling-video/v4/image-to-video",
-      "requires_input": true,
+      "id": "seedream_5_5_mcp",
+      "label": "Seedream 5.5",
+      "type": "image",
+      "backend": "magnific_mcp",
+      "mcp_tool": "images_generate",
+      "mcp_slug": "seedream-5-5",
+      "endpoint": "images_generate",
       "legal": "yellow",
-      "eta_sec": 300,
-      "output_ext": "mp4",
-      "max_input_pixels": 8000000,
-      "guide_fps": 24,
-      "int_params": [
-        "duration"
-      ],
-      "modes": [
+      "legal_note": "Magnific MCP laeuft ueber den persoenlichen Magnific-Login, NICHT ueber den Enterprise-Key. Ob die Enterprise-MSA-Zusagen (Output-Ownership, kein Training) dafuer gelten, vorher klaeren.",
+      "eta_sec": 40,
+      "output_ext": "png",
+      "max_input_pixels": 14000000,
+      "cost": {
+        "unit": "usd",
+        "note": "Magnific MCP: credits of YOUR logged-in Magnific account (Unlimited does not apply) -- see the account in Magnific"
+      },
+      "hint": "in1..in4 = reference images (optional). Prompt can use @in1..@in4.",
+      "input_map": [
         {
-          "label": "Start / End frame",
-          "endpoint": "fal-ai/kling-video/v4/image-to-video",
-          "hint": "in1 = start frame (required), in2 = end frame (optional). Seitenverhaeltnis kommt vom Startbild.",
-          "input_map": [
-            {
-              "field": "start_image_url"
-            },
-            {
-              "field": "end_image_url"
-            }
-          ],
-          "aspect_ratios": []
+          "role": "reference",
+          "type": "image"
         },
         {
-          "label": "Reference video",
-          "endpoint": "fal-ai/kling-video/v4/reference-to-video",
-          "hint": "in1 = Referenzvideo (3-30s, @Video1), in2..in4 = Referenzbilder (@Image1..). Dauer folgt automatisch der Laenge des Referenzvideos (kuerzere Referenz: letztes Bild wird gehalten).",
-          "input_map": [
-            {
-              "field": "video_urls",
-              "list": true,
-              "video": true
-            },
-            {
-              "field": "image_urls",
-              "list": true
-            },
-            {
-              "field": "image_urls",
-              "list": true
-            },
-            {
-              "field": "image_urls",
-              "list": true
-            }
-          ],
-          "aspect_ratios": [
-            "auto",
-            "16:9",
-            "9:16",
-            "1:1",
-            "21:9"
-          ],
-          "default_aspect_ratio": "auto",
-          "video_max_pixels": 2100000,
-          "video_ref_duration_bounds": [
-            3,
-            30
-          ],
-          "duration_follows_ref_video": true
+          "role": "reference",
+          "type": "image"
+        },
+        {
+          "role": "reference",
+          "type": "image"
+        },
+        {
+          "role": "reference",
+          "type": "image"
         }
       ],
-      "default_mode": "Reference video",
       "aspect_ratios": [
         "16:9",
         "9:16",
         "1:1",
-        "21:9"
+        "21:9",
+        "4:3",
+        "3:4",
+        "3:2",
+        "2:3"
       ],
       "default_aspect_ratio": "16:9",
       "resolutions": [
-        "720p",
-        "1080p"
+        "1k",
+        "1.5k",
+        "2k"
       ],
-      "default_resolution": "1080p",
-      "durations": [
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",
-        "10",
-        "11",
-        "12",
-        "13",
-        "14",
-        "15",
-        "16",
-        "17",
-        "18",
-        "19",
-        "20",
-        "21",
-        "22",
-        "23",
-        "24",
-        "25",
-        "26",
-        "27",
-        "28",
-        "29",
-        "30"
-      ],
-      "default_duration": "5",
+      "default_resolution": "2k",
       "api_params": {
-        "aspect_ratio": "aspect_ratio",
-        "resolution": "resolution",
-        "duration": "duration"
+        "aspect_ratio": "aspectRatio",
+        "resolution": "resolution"
       },
-      "cost": {
-        "unit": "usd",
-        "note": "fal-Preise siehe fal.ai/pricing"
+      "api_static": {
+        "count": 1
       },
       "legacy_labels": [
-        "Kling 4.0 (Video, fal)"
+        "Seedream 5.5 (Image, MCP)"
       ]
     },
     {
-      "id": "kling_3",
-      "label": "Kling 3.0",
-      "type": "video",
-      "backend": "magnific",
-      "requires_input": true,
-      "legal": "green",
-      "legal_note": "Magnific Enterprise MSA: Output-Ownership, IP-Indemnification, keine Nutzung von Inputs/Outputs fuers Modelltraining.",
-      "eta_sec": 300,
-      "output_ext": "mp4",
+      "id": "seedream_5_pro_mcp",
+      "label": "Seedream 5 Pro",
+      "type": "image",
+      "backend": "magnific_mcp",
+      "mcp_tool": "images_generate",
+      "mcp_slug": "seedream-5-pro",
+      "endpoint": "images_generate",
+      "legal": "yellow",
+      "legal_note": "Magnific MCP laeuft ueber den persoenlichen Magnific-Login, NICHT ueber den Enterprise-Key. Ob die Enterprise-MSA-Zusagen (Output-Ownership, kein Training) dafuer gelten, vorher klaeren.",
+      "eta_sec": 58,
+      "output_ext": "png",
+      "max_input_pixels": 14000000,
+      "cost": {
+        "unit": "usd",
+        "note": "Magnific MCP: credits of YOUR logged-in Magnific account (Unlimited does not apply) -- see the account in Magnific"
+      },
+      "hint": "in1..in4 = reference images (optional). Prompt can use @in1..@in4.",
+      "input_map": [
+        {
+          "role": "reference",
+          "type": "image"
+        },
+        {
+          "role": "reference",
+          "type": "image"
+        },
+        {
+          "role": "reference",
+          "type": "image"
+        },
+        {
+          "role": "reference",
+          "type": "image"
+        }
+      ],
       "aspect_ratios": [
         "16:9",
         "9:16",
-        "1:1"
+        "1:1",
+        "21:9",
+        "4:3",
+        "3:4",
+        "3:2",
+        "2:3"
       ],
       "default_aspect_ratio": "16:9",
-      "api_params": {
-        "aspect_ratio": "aspect_ratio",
-        "resolution": "resolution",
-        "duration": "duration"
-      },
-      "cost": {
-        "unit": "cr",
-        "per_sec": {
-          "720p": 70,
-          "1080p": 90,
-          "4K": 400
-        }
-      },
-      "modes": [
-        {
-          "label": "Start / End frame",
-          "endpoint": "video/kling-v3-pro",
-          "status_endpoint": "video/kling-v3",
-          "hint": "in1 = start frame (required), in2 = end frame, in3+in4 = element images (@Element1/@Element2 in prompt)",
-          "input_map": [
-            {
-              "field": "start_image_url"
-            },
-            {
-              "field": "end_image_url"
-            },
-            {
-              "field": "elements",
-              "list": true,
-              "wrap": "frontal_image_url"
-            },
-            {
-              "field": "elements",
-              "list": true,
-              "wrap": "frontal_image_url"
-            }
-          ],
-          "resolutions": [
-            "720p",
-            "1080p"
-          ],
-          "default_resolution": "1080p",
-          "durations": [
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "10",
-            "12",
-            "15"
-          ],
-          "default_duration": "5"
-        },
-        {
-          "label": "Start / End frame (4K)",
-          "endpoint": "video/kling-4k-i2v",
-          "hint": "in1 = start frame (required), in2 = end frame (optional). Dedicated 4K endpoint: KEIN aspect_ratio, KEINE Element-Bilder (in3/in4 werden ignoriert) -- anderes API-Schema als der 720p/1080p-Modus.",
-          "input_map": [
-            {
-              "field": "image"
-            },
-            {
-              "field": "image_tail"
-            }
-          ],
-          "aspect_ratios": [],
-          "resolutions": [],
-          "durations": [
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "10",
-            "12",
-            "15"
-          ],
-          "default_duration": "5",
-          "api_params": {
-            "duration": "duration"
-          }
-        },
-        {
-          "label": "Reference video",
-          "endpoint": "reference-to-video/kling-v3-omni-pro",
-          "status_endpoint": "video/kling-v3-omni",
-          "hint": "in1 = reference video (motion, @Video1, 3-10s), in2 = start frame (optional)",
-          "input_map": [
-            {
-              "field": "video_url",
-              "video": true
-            },
-            {
-              "field": "image_url"
-            }
-          ],
-          "resolutions": [
-            "720p",
-            "1080p"
-          ],
-          "default_resolution": "1080p",
-          "durations": [
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "10"
-          ],
-          "default_duration": "5",
-          "ref_video_matches_duration": true,
-          "crop_inputs_to_aspect": true,
-          "guide_fps": 24
-        }
+      "resolutions": [
+        "1.5k",
+        "2k"
       ],
-      "default_mode": "Reference video",
+      "default_resolution": "2k",
+      "api_params": {
+        "aspect_ratio": "aspectRatio",
+        "resolution": "resolution"
+      },
+      "api_static": {
+        "count": 1
+      },
       "legacy_labels": [
-        "Kling 3.0 (Video)"
+        "Seedream 5 Pro (Image, MCP)",
+        "Seedream v5 Pro",
+        "Seedream v5 Pro (Image)"
       ]
     },
     {
@@ -1528,7 +459,9 @@
         "withSoundEffects": false
       },
       "legacy_labels": [
-        "Seedance 2.5 (Video, MCP)"
+        "Seedance 2.5 (Video, MCP)",
+        "Seedance 2.5 Pro",
+        "Seedance 2.5 Pro (Video, Magnific)"
       ]
     },
     {
@@ -1709,7 +642,9 @@
         "withSoundEffects": false
       },
       "legacy_labels": [
-        "Seedance 2.0 (Video, MCP)"
+        "Seedance 2.0 (Video, MCP)",
+        "Seedance 2",
+        "Seedance 2 (Video)"
       ]
     },
     {
@@ -1876,7 +811,8 @@
       },
       "legacy_labels": [
         "Kling 4.0 (Video, MCP)",
-        "Video Modify (MCP)"
+        "Video Modify (MCP)",
+        "Kling 4.0 (Video, fal)"
       ]
     },
     {
@@ -2029,6 +965,118 @@
       ]
     },
     {
+      "id": "kling_3_mcp",
+      "label": "Kling 3.0",
+      "type": "video",
+      "backend": "magnific_mcp",
+      "mcp_tool": "video_generate",
+      "mcp_slug": "kling-30",
+      "endpoint": "video_generate",
+      "legal": "yellow",
+      "legal_note": "Magnific MCP laeuft ueber den persoenlichen Magnific-Login, NICHT ueber den Enterprise-Key. Ob die Enterprise-MSA-Zusagen (Output-Ownership, kein Training) dafuer gelten, vorher klaeren.",
+      "eta_sec": 300,
+      "output_ext": "mp4",
+      "max_input_pixels": 14000000,
+      "cost": {
+        "unit": "usd",
+        "note": "Magnific MCP: credits of YOUR logged-in Magnific account (Unlimited does not apply) -- see the account in Magnific"
+      },
+      "modes": [
+        {
+          "label": "Start / End frame",
+          "hint": "in1 = start frame, in2 = end frame (optional). Without inputs = text-to-video. Up to 4K.",
+          "input_map": [
+            {
+              "role": "start"
+            },
+            {
+              "role": "end"
+            }
+          ],
+          "mcp_slug": "kling-30",
+          "crop_inputs_to_aspect": true
+        },
+        {
+          "label": "Reference video",
+          "hint": "in1 = reference video (motion, 3-10 s, frame range of the comp), in2..in4 = reference images (optional). Prompt can use @in1..@in4. Duration follows the video length. Max 1080p. (Kling 3.0 Omni)",
+          "input_map": [
+            {
+              "role": "reference",
+              "type": "video",
+              "video": true
+            },
+            {
+              "role": "reference",
+              "type": "image"
+            },
+            {
+              "role": "reference",
+              "type": "image"
+            },
+            {
+              "role": "reference",
+              "type": "image"
+            }
+          ],
+          "mcp_slug": "kling-omni3",
+          "video_max_pixels": 8000000,
+          "video_ref_duration_bounds": [
+            3,
+            10
+          ],
+          "guide_fps": 24,
+          "duration_follows_ref_video": true,
+          "crop_inputs_to_aspect": true,
+          "resolutions": [
+            "720p",
+            "1080p"
+          ],
+          "default_resolution": "1080p"
+        }
+      ],
+      "default_mode": "Reference video",
+      "aspect_ratios": [
+        "16:9",
+        "9:16",
+        "1:1"
+      ],
+      "default_aspect_ratio": "16:9",
+      "resolutions": [
+        "720p",
+        "1080p",
+        "4K"
+      ],
+      "default_resolution": "1080p",
+      "durations": [
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15"
+      ],
+      "default_duration": "5",
+      "int_params": [
+        "duration"
+      ],
+      "api_params": {
+        "aspect_ratio": "aspectRatio",
+        "resolution": "resolution",
+        "duration": "duration"
+      },
+      "legacy_labels": [
+        "Kling 3.0 (Video, MCP)",
+        "Kling 3.0 (Video)"
+      ]
+    },
+    {
       "id": "gemini_omni_mcp",
       "label": "Gemini Omni 1.2 Flash",
       "type": "video",
@@ -2178,269 +1226,223 @@
         "duration": "duration"
       },
       "legacy_labels": [
-        "Gemini Omni 1.2 Flash (Video, MCP)"
+        "Gemini Omni 1.2 Flash (Video, MCP)",
+        "Gemini Omni Flash 1.2",
+        "Gemini Omni Flash 1.2 (Video)"
       ]
     },
     {
-      "id": "gpt_2_6_mcp",
-      "label": "GPT 2.6",
-      "type": "image",
+      "id": "minimax_h3_mcp",
+      "label": "MiniMax H3",
+      "type": "video",
       "backend": "magnific_mcp",
-      "mcp_tool": "images_generate",
-      "mcp_slug": "gpt-2-6",
-      "endpoint": "images_generate",
+      "mcp_tool": "video_generate",
+      "mcp_slug": "minimax-video-3_0",
+      "endpoint": "video_generate",
       "legal": "yellow",
       "legal_note": "Magnific MCP laeuft ueber den persoenlichen Magnific-Login, NICHT ueber den Enterprise-Key. Ob die Enterprise-MSA-Zusagen (Output-Ownership, kein Training) dafuer gelten, vorher klaeren.",
-      "eta_sec": 60,
-      "output_ext": "png",
-      "max_input_pixels": 14000000,
+      "eta_sec": 300,
+      "output_ext": "mp4",
+      "max_input_pixels": 13000000,
       "cost": {
         "unit": "usd",
         "note": "Magnific MCP: credits of YOUR logged-in Magnific account (Unlimited does not apply) -- see the account in Magnific"
       },
-      "hint": "in1..in4 = reference images (optional). Prompt can use @in1..@in4.",
-      "input_map": [
+      "modes": [
         {
-          "role": "reference",
-          "type": "image"
+          "label": "Image -> Video",
+          "hint": "in1 = start frame, in2 = end frame (optional). Without inputs = text-to-video. The ratio follows the start frame.",
+          "input_map": [
+            {
+              "role": "start"
+            },
+            {
+              "role": "end"
+            }
+          ]
         },
         {
-          "role": "reference",
-          "type": "image"
+          "label": "Reference -> Video",
+          "hint": "in1 = reference video (2-15 s, frame range of the comp), in2..in4 = reference images (optional). Prompt can use @in1..@in4.",
+          "input_map": [
+            {
+              "role": "reference",
+              "type": "video",
+              "video": true
+            },
+            {
+              "role": "reference",
+              "type": "image"
+            },
+            {
+              "role": "reference",
+              "type": "image"
+            },
+            {
+              "role": "reference",
+              "type": "image"
+            }
+          ],
+          "video_max_pixels": 8000000,
+          "video_ref_duration_bounds": [
+            2,
+            15
+          ],
+          "guide_fps": 24
         },
         {
-          "role": "reference",
-          "type": "image"
+          "label": "Text -> Video",
+          "hint": "no inputs, prompt only.",
+          "input_map": []
         },
         {
-          "role": "reference",
-          "type": "image"
+          "label": "Modify",
+          "hint": "in1 = footage to edit (comp frame range, frame-exact; 2-15 s), in2..in4 = reference images (optional). The output keeps the length and fps of the footage. Describe the CHANGE in the prompt.",
+          "input_map": [
+            {
+              "role": "source",
+              "video": true
+            },
+            {
+              "role": "reference",
+              "type": "image"
+            },
+            {
+              "role": "reference",
+              "type": "image"
+            },
+            {
+              "role": "reference",
+              "type": "image"
+            }
+          ],
+          "mcp_slug": "video-modify-minimax-h3",
+          "video_ref_duration_bounds": [
+            2,
+            15
+          ],
+          "video_max_pixels": 8000000,
+          "guide_fps": "comp",
+          "resolutions": [
+            "768p",
+            "2K"
+          ],
+          "default_resolution": "2K",
+          "mcp_tool": "video_modify",
+          "endpoint": "video_modify",
+          "aspect_ratios": [],
+          "durations": [],
+          "api_params": {
+            "resolution": "resolution"
+          },
+          "api_static": {},
+          "crop_inputs_to_aspect": false,
+          "duration_follows_ref_video": false,
+          "ref_video_matches_duration": false
         }
       ],
+      "default_mode": "Reference -> Video",
       "aspect_ratios": [
         "16:9",
         "9:16",
         "1:1",
         "21:9",
         "4:3",
-        "3:4",
-        "3:2",
-        "2:3"
+        "3:4"
       ],
       "default_aspect_ratio": "16:9",
       "resolutions": [
-        "1k",
-        "2k",
-        "4k"
+        "480p",
+        "768p",
+        "2K"
       ],
-      "default_resolution": "2k",
+      "default_resolution": "2K",
+      "durations": [
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15"
+      ],
+      "default_duration": "5",
+      "int_params": [
+        "duration"
+      ],
       "api_params": {
         "aspect_ratio": "aspectRatio",
-        "resolution": "resolution"
-      },
-      "api_static": {
-        "count": 1,
-        "extraSettings": {
-          "quality": "high",
-          "variant": "sunburst"
-        }
+        "resolution": "resolution",
+        "duration": "duration"
       },
       "legacy_labels": [
-        "GPT 2.6 (Image, MCP)",
-        "GPT 2.5 (Image, MCP)"
+        "MiniMax H3 (Video, MCP)",
+        "MiniMax H3 (Video)"
       ]
     },
     {
-      "id": "nano_banana_2_1_mcp",
-      "label": "Nano Banana 2.1",
-      "type": "image",
-      "backend": "magnific_mcp",
-      "mcp_tool": "images_generate",
-      "mcp_slug": "imagen-nano-banana-2-1",
-      "endpoint": "images_generate",
-      "legal": "yellow",
-      "legal_note": "Magnific MCP laeuft ueber den persoenlichen Magnific-Login, NICHT ueber den Enterprise-Key. Ob die Enterprise-MSA-Zusagen (Output-Ownership, kein Training) dafuer gelten, vorher klaeren.",
-      "eta_sec": 45,
-      "output_ext": "png",
-      "max_input_pixels": 14000000,
-      "cost": {
-        "unit": "usd",
-        "note": "Magnific MCP: credits of YOUR logged-in Magnific account (Unlimited does not apply) -- see the account in Magnific"
-      },
-      "hint": "in1..in4 = reference images (optional). Prompt can use @in1..@in4.",
+      "id": "wan_2_7_edit",
+      "label": "Wan 2.7 Video Edit",
+      "type": "video",
+      "backend": "magnific",
+      "endpoint": "video-edit/wan-2-7",
+      "requires_input": true,
+      "legal": "green",
+      "legal_note": "Magnific Enterprise MSA: Output-Ownership, IP-Indemnification, keine Nutzung von Inputs/Outputs fuers Modelltraining.",
+      "eta_sec": 240,
+      "output_ext": "mp4",
+      "hint": "in1 = Quellvideo (2-10s, bleibt in Laenge/Bewegung erhalten), in2..in4 = Referenz-/Stilbilder (optional). Prompt beschreibt nur die Aenderung (Referenzbilder: sagen, wie sie angewendet werden). Seitenverhaeltnis folgt dem Quellvideo.",
+      "max_input_pixels": 4000000,
+      "video_max_pixels": 2100000,
+      "video_ref_duration_bounds": [
+        2,
+        10
+      ],
+      "guide_fps": 24,
       "input_map": [
         {
-          "role": "reference",
-          "type": "image"
+          "field": "video_url",
+          "video": true
         },
         {
-          "role": "reference",
-          "type": "image"
+          "field": "image_urls",
+          "list": true
         },
         {
-          "role": "reference",
-          "type": "image"
+          "field": "image_urls",
+          "list": true
         },
         {
-          "role": "reference",
-          "type": "image"
+          "field": "image_urls",
+          "list": true
         }
       ],
-      "aspect_ratios": [
-        "16:9",
-        "9:16",
-        "1:1",
-        "21:9",
-        "4:3",
-        "3:4",
-        "3:2",
-        "2:3"
-      ],
-      "default_aspect_ratio": "16:9",
+      "aspect_ratios": [],
       "resolutions": [
-        "1k",
-        "2k",
-        "4k"
+        "720P",
+        "1080P"
       ],
-      "default_resolution": "2k",
+      "default_resolution": "1080P",
       "api_params": {
-        "aspect_ratio": "aspectRatio",
         "resolution": "resolution"
       },
       "api_static": {
-        "count": 1
-      },
-      "legacy_labels": [
-        "Nano Banana 2.1 (Image, MCP)",
-        "Nano Banana 2 (Image, MCP)",
-        "Nano Banana 2"
-      ]
-    },
-    {
-      "id": "seedream_5_5_mcp",
-      "label": "Seedream 5.5",
-      "type": "image",
-      "backend": "magnific_mcp",
-      "mcp_tool": "images_generate",
-      "mcp_slug": "seedream-5-5",
-      "endpoint": "images_generate",
-      "legal": "yellow",
-      "legal_note": "Magnific MCP laeuft ueber den persoenlichen Magnific-Login, NICHT ueber den Enterprise-Key. Ob die Enterprise-MSA-Zusagen (Output-Ownership, kein Training) dafuer gelten, vorher klaeren.",
-      "eta_sec": 40,
-      "output_ext": "png",
-      "max_input_pixels": 14000000,
-      "cost": {
-        "unit": "usd",
-        "note": "Magnific MCP: credits of YOUR logged-in Magnific account (Unlimited does not apply) -- see the account in Magnific"
-      },
-      "hint": "in1..in4 = reference images (optional). Prompt can use @in1..@in4.",
-      "input_map": [
-        {
-          "role": "reference",
-          "type": "image"
-        },
-        {
-          "role": "reference",
-          "type": "image"
-        },
-        {
-          "role": "reference",
-          "type": "image"
-        },
-        {
-          "role": "reference",
-          "type": "image"
+        "duration": 0,
+        "additional_settings": {
+          "audio_setting": "auto",
+          "prompt_extend": false
         }
-      ],
-      "aspect_ratios": [
-        "16:9",
-        "9:16",
-        "1:1",
-        "21:9",
-        "4:3",
-        "3:4",
-        "3:2",
-        "2:3"
-      ],
-      "default_aspect_ratio": "16:9",
-      "resolutions": [
-        "1k",
-        "1.5k",
-        "2k"
-      ],
-      "default_resolution": "2k",
-      "api_params": {
-        "aspect_ratio": "aspectRatio",
-        "resolution": "resolution"
       },
-      "api_static": {
-        "count": 1
-      },
-      "legacy_labels": [
-        "Seedream 5.5 (Image, MCP)"
-      ]
-    },
-    {
-      "id": "seedream_5_pro_mcp",
-      "label": "Seedream 5 Pro",
-      "type": "image",
-      "backend": "magnific_mcp",
-      "mcp_tool": "images_generate",
-      "mcp_slug": "seedream-5-pro",
-      "endpoint": "images_generate",
-      "legal": "yellow",
-      "legal_note": "Magnific MCP laeuft ueber den persoenlichen Magnific-Login, NICHT ueber den Enterprise-Key. Ob die Enterprise-MSA-Zusagen (Output-Ownership, kein Training) dafuer gelten, vorher klaeren.",
-      "eta_sec": 58,
-      "output_ext": "png",
-      "max_input_pixels": 14000000,
       "cost": {
-        "unit": "usd",
-        "note": "Magnific MCP: credits of YOUR logged-in Magnific account (Unlimited does not apply) -- see the account in Magnific"
-      },
-      "hint": "in1..in4 = reference images (optional). Prompt can use @in1..@in4.",
-      "input_map": [
-        {
-          "role": "reference",
-          "type": "image"
-        },
-        {
-          "role": "reference",
-          "type": "image"
-        },
-        {
-          "role": "reference",
-          "type": "image"
-        },
-        {
-          "role": "reference",
-          "type": "image"
-        }
-      ],
-      "aspect_ratios": [
-        "16:9",
-        "9:16",
-        "1:1",
-        "21:9",
-        "4:3",
-        "3:4",
-        "3:2",
-        "2:3"
-      ],
-      "default_aspect_ratio": "16:9",
-      "resolutions": [
-        "1.5k",
-        "2k"
-      ],
-      "default_resolution": "2k",
-      "api_params": {
-        "aspect_ratio": "aspectRatio",
-        "resolution": "resolution"
-      },
-      "api_static": {
-        "count": 1
+        "unit": "cr",
+        "note": "Magnific-Credits, Preis siehe magnific.com/pricing"
       },
       "legacy_labels": [
-        "Seedream 5 Pro (Image, MCP)"
+        "Wan 2.7 Video Edit (Video)"
       ]
     },
     {
@@ -2455,6 +1457,7 @@
       "legal_note": "Magnific MCP laeuft ueber den persoenlichen Magnific-Login, NICHT ueber den Enterprise-Key. Ob die Enterprise-MSA-Zusagen (Output-Ownership, kein Training) dafuer gelten, vorher klaeren.",
       "eta_sec": 90,
       "output_ext": "mp4",
+      "raw_result": true,
       "hint": "in1 = footage (whole comp frame range, 30 s / 200 MB max). Result = per-frame depth video (Video Depth Anything, temporally consistent), same length and fps. Near = bright, far = dark. The prompt is ignored.",
       "video_ref_duration_bounds": [
         0.1,
@@ -2479,6 +1482,21 @@
           ],
           "api_static": {
             "colormap": "grayscale"
+          }
+        },
+        {
+          "label": "Float (EXR)",
+          "hint": "Float depth as an EXR sequence (R=G=B) for ZDefocus & co. -- no 8-bit banding. The model's relative depth (near = high, like Nuke's depth.Z), not metres and not 0-1. in1 = footage (whole comp frame range, 30 s / 200 MB max). Big: ~25 MB per 1080p frame on disk (R=G=B, 32-bit); the server keeps the float data only a few minutes, so Nuke downloads it right after the job (can take a while). If the float data is not available you get the 8-bit video instead. Prompt ignored.",
+          "input_map": [
+            {
+              "role": "source",
+              "video": true
+            }
+          ],
+          "raw_depth": true,
+          "api_static": {
+            "colormap": "grayscale",
+            "rawDepth": true
           }
         },
         {
@@ -2524,6 +1542,127 @@
       "default_mode": "Grayscale"
     },
     {
+      "id": "video_depth_fal",
+      "label": "Video Depth",
+      "type": "video",
+      "backend": "fal",
+      "endpoint": "fal-ai/depth-anything-video",
+      "requires_input": true,
+      "send_prompt": false,
+      "legal": "yellow",
+      "legal_note": "fal.ai: Footage wird zu fal hochgeladen und dort verarbeitet. Fuer Kundenmaterial vorher klaeren, ob das erlaubt ist.",
+      "eta_sec": 90,
+      "output_ext": "mp4",
+      "raw_result": true,
+      "hint": "Video Depth Anything (VDA-Large) via fal.ai. in1 = footage (whole comp frame range, max 2400 frames, sent at max 1080p). Prompt ignored. Result = per-frame depth video, temporally consistent, same length and fps. Near = bright, far = dark.",
+      "video_ref_duration_bounds": [
+        0.1,
+        96
+      ],
+      "video_max_pixels": 2073600,
+      "guide_fps": "comp",
+      "aspect_ratios": [],
+      "cost": {
+        "unit": "usd",
+        "note": "fal.ai: about $0.04 per second of footage (VDA-Large), billed to your fal key"
+      },
+      "modes": [
+        {
+          "label": "Grayscale",
+          "hint": "Grayscale depth (near = bright, far = dark): the pass for compositing / ZDefocus / relight. in1 = footage (whole comp frame range, max 2400 frames, sent at max 1080p). Prompt ignored.",
+          "input_map": [
+            {
+              "field": "video_url",
+              "video": true
+            }
+          ],
+          "api_static": {
+            "model": "VDA-Large",
+            "resolution": "auto",
+            "colormap": "grayscale"
+          }
+        },
+        {
+          "label": "Float (EXR)",
+          "hint": "Float depth as an EXR sequence (R=G=B) for ZDefocus & co. -- no 8-bit banding. The model's relative depth (near = high, like Nuke's depth.Z), not metres and not 0-1. Big: ~25 MB per 1080p frame on disk (R=G=B, 32-bit). If the float data is not available you get the 8-bit video instead. in1 = footage (whole comp frame range, max 2400 frames, sent at max 1080p). Prompt ignored.",
+          "input_map": [
+            {
+              "field": "video_url",
+              "video": true
+            }
+          ],
+          "api_static": {
+            "model": "VDA-Large",
+            "resolution": "auto",
+            "colormap": "grayscale",
+            "include_raw_depths": true
+          },
+          "raw_depth": true
+        },
+        {
+          "label": "Turbo",
+          "hint": "Colour-coded depth (turbo) to check the result. in1 = footage (whole comp frame range, max 2400 frames, sent at max 1080p). Prompt ignored.",
+          "input_map": [
+            {
+              "field": "video_url",
+              "video": true
+            }
+          ],
+          "api_static": {
+            "model": "VDA-Large",
+            "resolution": "auto",
+            "colormap": "turbo"
+          }
+        },
+        {
+          "label": "Inferno",
+          "hint": "Colour-coded depth (inferno). in1 = footage (whole comp frame range, max 2400 frames, sent at max 1080p). Prompt ignored.",
+          "input_map": [
+            {
+              "field": "video_url",
+              "video": true
+            }
+          ],
+          "api_static": {
+            "model": "VDA-Large",
+            "resolution": "auto",
+            "colormap": "inferno"
+          }
+        },
+        {
+          "label": "Magma",
+          "hint": "Colour-coded depth (magma). in1 = footage (whole comp frame range, max 2400 frames, sent at max 1080p). Prompt ignored.",
+          "input_map": [
+            {
+              "field": "video_url",
+              "video": true
+            }
+          ],
+          "api_static": {
+            "model": "VDA-Large",
+            "resolution": "auto",
+            "colormap": "magma"
+          }
+        },
+        {
+          "label": "Viridis",
+          "hint": "Colour-coded depth (viridis). in1 = footage (whole comp frame range, max 2400 frames, sent at max 1080p). Prompt ignored.",
+          "input_map": [
+            {
+              "field": "video_url",
+              "video": true
+            }
+          ],
+          "api_static": {
+            "model": "VDA-Large",
+            "resolution": "auto",
+            "colormap": "viridis"
+          }
+        }
+      ],
+      "default_mode": "Grayscale"
+    },
+    {
       "id": "ltx_alpha_gen",
       "label": "Alpha Gen",
       "type": "video",
@@ -2535,6 +1674,7 @@
       "legal_note": "LTX-API-Nutzungsbedingungen (Lightricks) fuer Studio-Arbeit noch nicht geprueft; Abrechnung ueber eigene LTX-Developer-Console-Credits (nicht der Magnific-Vertrag).",
       "eta_sec": 60,
       "output_ext": "mp4",
+      "raw_result": true,
       "hint": "in1 = video (whole comp frame range, max 3072 frames, up to 3840x2160). Result = grayscale MATTE (white = foreground) as sequence; the ProRes 4444 cutout (.mov with alpha) is saved next to it in GenAI/DOWNLOAD. The prompt is ignored.",
       "input_map": [
         {
