@@ -49,6 +49,7 @@ class MagnificMcpBackend(Backend):
 
     def __init__(self):
         self._uploads = {}   # lokaler Pfad -> Creation-ID (gleicher Upload nur einmal)
+        self._raw_dropped = set()   # Jobs, bei denen der Server rawDepth nicht annahm
 
     # ---- oeffentliche Schnittstelle ---------------------------------------------
 
@@ -100,12 +101,33 @@ class MagnificMcpBackend(Backend):
                 rtype = input_map[idx].get("type", "image")
                 args.setdefault("references", []).append({"type": rtype, spec["ref_key"]: ident})
 
-        result = client.call(tool, args)
+        dropped_raw = False
+        try:
+            result = client.call(tool, args)
+        except Exception as exc:
+            # Float-Depth (rawDepth) kennt nicht jeder Server-Stand: dann ohne rawDepth erneut,
+            # der Aufrufer faellt auf das 8-Bit-Video zurueck (raw_depth_url() liefert "").
+            msg = str(exc).lower()
+            if not (args.get("rawDepth") and any(k in msg for k in (
+                    "rawdepth", "unrecognized", "unknown", "additional propert", "invalid"))):
+                raise
+            args.pop("rawDepth")
+            dropped_raw = True
+            result = client.call(tool, args)
         ids = _find_identifiers(result)
         if not ids:
             raise BackendError(format_error(
                 "no creation id in the answer", _PROVIDER, json.dumps(result)[:300]))
+        if dropped_raw:
+            self._raw_dropped.add(ids[0])
         return ids[0]
+
+    def raw_depth_url(self, job_id):
+        """Link auf die Float-Depth-.npz eines fertigen Depth-Clips ("" = (noch) nicht da)."""
+        if job_id in self._raw_dropped:
+            return ""
+        data = mcp_client.get_client().call("creations_get", {"creationIdentifier": job_id})
+        return _find_npz_url(data)
 
     def poll(self, job_id):
         client = mcp_client.get_client()
@@ -216,6 +238,24 @@ def _find_identifiers(obj):
         if f not in out:
             out.append(f)
     return out
+
+
+def _find_npz_url(obj):
+    """https-Link unter dem Schluessel "npz" (creations_get: otherFormats.npz), sonst ""."""
+    if isinstance(obj, dict):
+        v = obj.get("npz")
+        if isinstance(v, str) and v.startswith("https://"):
+            return v
+        for x in obj.values():
+            u = _find_npz_url(x)
+            if u:
+                return u
+    elif isinstance(obj, list):
+        for x in obj:
+            u = _find_npz_url(x)
+            if u:
+                return u
+    return ""
 
 
 def _first_url(res):

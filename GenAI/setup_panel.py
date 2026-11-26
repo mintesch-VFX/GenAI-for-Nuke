@@ -23,10 +23,10 @@ from . import config, mcp_auth
 
 # (Key-Name, Anzeige-Label, Hinweis + Bezugsquelle)
 _KEY_FIELDS = [
-    ("MAGNIFIC_API_KEY", "Magnific API Key", "Magnific im API-Modus (statt Login)  —  magnific.com → API"),
-    ("FAL_KEY", "fal Key", "API-Modus: nötig, wenn Bilder/Video als Eingang mitgehen (fal.ai hostet den Upload), und für Seedance 2, Gemini Omni, Kling 4.0 (API)  —  fal.ai"),
-    ("OPENAI_API_KEY", "OpenAI API Key", "GPT 2 im API-Modus  —  platform.openai.com"),
-    ("GOOGLE_API_KEY", "Google AI Studio Key", "optional (direkt)  —  aistudio.google.com"),
+    ("MAGNIFIC_API_KEY", "Magnific API Key", "Wan 2.7 Video Edit im API-Modus (statt Login)  —  magnific.com → API"),
+    ("FAL_KEY", "fal Key", "Nur für Wan 2.7 Video Edit (API): fal.ai hostet das hochgeladene Video, die Magnific-API nimmt nur URLs  —  fal.ai"),
+    ("OPENAI_API_KEY", "OpenAI API Key", "aktuell nutzt kein Modell diesen Key  —  platform.openai.com"),
+    ("GOOGLE_API_KEY", "Google AI Studio Key", "aktuell nutzt kein Modell diesen Key  —  aistudio.google.com"),
     ("LTX_API_KEY", "LTX API Key", "Alpha Gen (Matte), Upscale  —  console.ltx.io (Developer Console, getrennt vom LTX-Studio-Account; Credits vorab kaufen)"),
 ]
 

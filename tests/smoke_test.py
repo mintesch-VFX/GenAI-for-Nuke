@@ -29,8 +29,17 @@ with open(os.path.join(ROOT, "GenAI", "manifest.json"), encoding="utf-8") as fh:
     manifest = json.load(fh)
 models = manifest["models"]
 check("manifest lädt, >=1 Modell", len(models) >= 1)
-check("MVP-Modell ist nano_banana_2", models[0]["id"] == "nano_banana_2")
-check("Modell hat endpoint", bool(models[0].get("endpoint")))
+def _iface(m):
+    b = m.get("backend")
+    return "MCP" if b == "magnific_mcp" else ("local" if b == "local" else "API")
+
+
+_pairs = [(_iface(m), m["label"]) for m in models]
+check("Labels sind je Interface eindeutig", len(_pairs) == len(set(_pairs)))
+check("API-Liste = nur was MCP nicht hat",
+      sorted(l for i, l in _pairs if i == "API") == ["Alpha Gen", "Upscale", "Wan 2.7 Video Edit"])
+check("Jedes Modell hat einen endpoint (oder Provider/Export)",
+      all(m.get("endpoint") or m.get("providers") or m.get("local_export") or m.get("modes") for m in models))
 
 print("== prompt-@ref-Parsing ==")
 check("@ref1/@ref3 -> [0, 2]", prompt.find_refs("a @ref1 b @ref3") == [0, 2])

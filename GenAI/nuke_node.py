@@ -19,7 +19,7 @@ import traceback
 
 import nuke
 
-from . import config, render, video
+from . import config, depth_raw, render, video
 from . import prompt as prompt_mod
 from .backends import get_backend
 from .backends.base import DONE, ERROR
@@ -146,7 +146,7 @@ def _default_interface():
     """Interface fuer neue Nodes: MCP -- ausser jemand nutzt nur API-Keys und ist nicht bei Magnific eingeloggt."""
     if config.has_backend_key(config.MCP_BACKEND):
         return "MCP"
-    return "API" if config.has_any_api_key() else "MCP"
+    return "API" if _has_real_models("API") else "MCP"
 
 
 def _node_interface(node):
@@ -265,6 +265,7 @@ def _add_ui_knobs(group, labels, iface="API", add_tab=True):
     group.addKnob(aspect_knob)
 
     res_knob = nuke.Enumeration_Knob("resolution", "Resolution", ["1080p"])
+    res_knob.clearFlag(nuke.STARTLINE)  # gleiche Zeile wie Aspect Ratio
     group.addKnob(res_knob)
 
     dur_knob = nuke.Enumeration_Knob("duration", "Duration (s)", [" "])
@@ -302,11 +303,19 @@ def _add_ui_knobs(group, labels, iface="API", add_tab=True):
     )
     group.addKnob(provider_knob)
 
+    setup_btn = nuke.PyScript_Knob(
+        "setup", "  Setup  ",
+        "import GenAI.setup_panel as S; S.show_setup()",
+    )
+    setup_btn.setTooltip("Open the GenAI setup window (Magnific login, optional API keys, output folder).")
+    setup_btn.clearFlag(nuke.STARTLINE)  # gleiche Zeile wie Provider
+    group.addKnob(setup_btn)
+
     btn = nuke.PyScript_Knob(
         "generate", "  Generate  ",
         "import GenAI.nuke_node as N; N.generate(nuke.thisNode())",
     )
-    btn.clearFlag(nuke.STARTLINE)  # gleiche Zeile wie Provider
+    btn.clearFlag(nuke.STARTLINE)  # gleiche Zeile wie Provider und Setup
     group.addKnob(btn)
 
     group.addKnob(nuke.Text_Knob("status", "Status", "ready"))
@@ -1074,7 +1083,7 @@ def generate(node):
             active["api_params"] = _mode["api_params"]
         # Magnific MCP: Tool + Modell-Slug koennen pro Mode wechseln (z. B. Kling 4 Standard
         # fuer Start/End-Frames, Omni fuer Referenzen; Video Modify: ein Mode je Modell).
-        for _k in ("mcp_tool", "mcp_slug"):
+        for _k in ("mcp_tool", "mcp_slug", "raw_depth"):
             _v = _mode_get(eff, node, _k)
             if _v:
                 active[_k] = _v
@@ -1147,6 +1156,54 @@ def _fps_differs(a, b):
 
 def _fps_text(v):
     return ("%g" % round(float(v), 3))
+
+
+RAW_DEPTH_WAIT_SEC = 15 * 60    # so lange auf die Float-Depth (.npz) warten
+RAW_DEPTH_POLL_SEC = 10
+
+
+def _float_depth_result(node, backend, job_id, mp4_path, outputs_dir, filename):
+    """Float-Depth eines fertigen Depth-Jobs als EXR-Sequenz: (pattern, first, last) oder None,
+    wenn der Server keine liefert. Laeuft im Worker-Thread (Status ueber executeInMainThread)."""
+    deadline = time.time() + RAW_DEPTH_WAIT_SEC
+    start = time.time()
+    url = ""
+    while True:
+        try:
+            url = backend.raw_depth_url(job_id)
+        except Exception as exc:
+            nuke.tprint("raw depth lookup failed: {e}".format(e=exc))
+            url = ""
+        if url or time.time() >= deadline or job_id in getattr(backend, "_raw_dropped", ()):
+            break
+        nuke.executeInMainThread(_set_status, args=(node, "waiting for the float depth ... {s}s".format(
+            s=int(time.time() - start))))
+        time.sleep(RAW_DEPTH_POLL_SEC)
+    if not url:
+        return None
+    base = os.path.join(outputs_dir, os.path.splitext(filename)[0])
+    npz_path = base + "_depth.npz"
+    nuke.executeInMainThread(_set_status, args=(node, "downloading the float depth ..."))
+    depth_raw.download_to_file(url, npz_path)
+    last_shown = [0.0]
+
+    def progress(done, total):
+        if time.time() - last_shown[0] > 1.0 or done == total:
+            last_shown[0] = time.time()
+            nuke.executeInMainThread(_set_status, args=(node, "writing float depth frame {d} of {t} ...".format(
+                d=done, t=total)))
+
+    out_dir = base + "_depth_exr"
+    try:
+        pattern, first, last = depth_raw.npz_to_exr_sequence(npz_path, out_dir, progress=progress)
+    except Exception:
+        shutil.rmtree(out_dir, ignore_errors=True)    # halbe Sequenz nicht liegen lassen
+        raise
+    try:
+        os.remove(npz_path)       # mehrere GB Rohdaten nach der Umwandlung nicht behalten
+    except OSError:
+        pass
+    return pattern, first, last
 
 
 def _worker(node, model, prompt_text, inputs, params, outputs_dir, settings=None, comp_fps=None):
@@ -1241,6 +1298,26 @@ def _worker(node, model, prompt_text, inputs, params, outputs_dir, settings=None
                         nuke.tprint("extra download failed ({l}): {e}".format(l=_label, e=_exc))
                 if saved:
                     extra_note = "also saved: " + ", ".join(saved)
+                float_note = None
+                if is_video and model.get("raw_depth"):
+                    # Float-Depth: .npz holen und als EXR-Sequenz schreiben; klappt das nicht,
+                    # bleibt es beim (schon geladenen) 8-Bit-Video darunter.
+                    try:
+                        done = _float_depth_result(node, backend, job_id, path, outputs_dir, filename)
+                    except Exception as _exc:
+                        done = None
+                        float_note = "float depth failed ({e}) -- 8-bit depth video loaded".format(e=_exc)
+                        nuke.tprint(traceback.format_exc())
+                    if done:
+                        pattern, first, last = done
+                        note = "float depth, EXR (R=G=B)"
+                        if extra_note:
+                            note += "; " + extra_note
+                        nuke.executeInMainThread(_on_done, args=(node, pattern, True, first, last, model.get("label"), settings, note, True))
+                        return
+                    if float_note is None:
+                        float_note = "float depth not available -- 8-bit depth video loaded"
+                    extra_note = (extra_note + "; " if extra_note else "") + float_note
                 if is_video:
                     # Nukes Reader indiziert fal-mp4s falsch -> in PNG-Sequenz wandeln.
                     nuke.executeInMainThread(_set_status, args=(node, "transcoding video ..."))
@@ -1255,9 +1332,9 @@ def _worker(node, model, prompt_text, inputs, params, outputs_dir, settings=None
                             a=_fps_text(native_fps), b=_fps_text(_fps))
                     if extra_note:
                         note = (note + "; " if note else "") + extra_note
-                    nuke.executeInMainThread(_on_done, args=(node, pattern, True, first, last, model.get("label"), settings, note))
+                    nuke.executeInMainThread(_on_done, args=(node, pattern, True, first, last, model.get("label"), settings, note, bool(model.get("raw_result"))))
                 else:
-                    nuke.executeInMainThread(_on_done, args=(node, path, False, None, None, model.get("label"), settings))
+                    nuke.executeInMainThread(_on_done, args=(node, path, False, None, None, model.get("label"), settings, None, bool(model.get("raw_result"))))
                 return
             if st.status == ERROR:
                 nuke.executeInMainThread(_set_status, args=(node, "Error: {e}".format(e=st.error)))
@@ -1289,9 +1366,9 @@ def _gen_status(prefix, entry):
     return prefix + ("  ·  " + m if m else "")
 
 
-def _on_done(node, path, is_video=False, first=None, last=None, model_label=None, settings=None, note=None):
+def _on_done(node, path, is_video=False, first=None, last=None, model_label=None, settings=None, note=None, raw=False):
     """Main-Thread: neue Generierung in die History aufnehmen und anzeigen."""
-    entry = _history_add(node, path, bool(is_video), first, last, model_label, settings)
+    entry = _history_add(node, path, bool(is_video), first, last, model_label, settings, raw=raw)
     _show_generation(node, entry)
     try:
         if node.knob("last_output"):
@@ -1321,8 +1398,13 @@ def _show_generation(node, entry):
             if existing is not None:
                 nuke.delete(existing)
         read = _make_result_read(result_name, posix, is_video, entry.get("first"), entry.get("last"))
-        tail = render.make_ocio_display(read, invert=True)
-        tail.setName(ocio_name)
+        if _entry_is_raw(entry):
+            # Depth/Alpha-Matte/Float-EXR sind Messwerte, kein Bild: Raw laden, keine
+            # Display-Rueckrechnung (OCIODisplay invert).
+            tail = read
+        else:
+            tail = render.make_ocio_display(read, invert=True)
+            tail.setName(ocio_name)
         for out in nuke.allNodes("Output"):
             out.setInput(0, tail)
     finally:
@@ -1415,13 +1497,25 @@ def _current_index(node, hist):
         return len(hist) - 1
 
 
-def _history_add(node, path, is_video, first, last, model_label=None, settings=None):
+def _entry_is_raw(entry):
+    """Soll dieses Ergebnis als Raw-Messwert (ohne OCIO-Display-Rueckrechnung) geladen werden?
+    Depth, Alpha-Matte und Float-EXR: ja. Aeltere History-Eintraege ohne Flag werden ueber das
+    Modell-Label (Manifest: raw_result) erkannt."""
+    if entry.get("raw") or str(entry.get("path", "")).lower().endswith(".exr"):
+        return True
+    m = _model_by_label(entry.get("model")) if entry.get("model") else None
+    return bool(m and m.get("raw_result"))
+
+
+def _history_add(node, path, is_video, first, last, model_label=None, settings=None, raw=False):
     hist = _history_load(node)
     num = (hist[-1].get("num", len(hist)) + 1) if hist else 1
     label = "#{n}  {t}".format(n=num, t=datetime.datetime.now().strftime("%H:%M:%S"))
     entry = {"path": path.replace("\\", "/"), "is_video": bool(is_video),
              "first": first, "last": last, "num": num, "label": label,
              "model": model_label, "settings": settings}
+    if raw:
+        entry["raw"] = True
     hist.append(entry)
     hist = hist[-MAX_HISTORY:]
     _history_save(node, hist)
@@ -1472,15 +1566,18 @@ def extract(node):
     with nuke.root():
         read = _make_result_read(read_name, entry["path"].replace("\\", "/"),
                                  entry.get("is_video"), entry.get("first"), entry.get("last"))
-        ocd = render.make_ocio_display(read, invert=True)
-        ocd.setName(read_name + "_toACES")
+        ocd = None
+        if not _entry_is_raw(entry):      # Depth/Matte/Float: Messwerte, keine Display-Rueckrechnung
+            ocd = render.make_ocio_display(read, invert=True)
+            ocd.setName(read_name + "_toACES")
         try:
             read["tile_color"].setValue(0x228822ff)  # grün, damit gut sichtbar
             read.setXYpos(nx + 200, ny + 120)
             # Ein Read mit Postage-Stamp ist ~92 px hoch -> der OCIODisplay muss darunter
             # statt im Read haengen (feste 70 px Abstand ueberlappten ihn).
             read_h = int(read.screenHeight() or 0) or 92
-            ocd.setXYpos(nx + 200, ny + 120 + read_h + 25)
+            if ocd is not None:
+                ocd.setXYpos(nx + 200, ny + 120 + read_h + 25)
         except Exception:
             pass
     _set_status(node, "extracted {lbl} -> {name}".format(lbl=entry["label"], name=read.fullName()))
@@ -1697,7 +1794,7 @@ def _on_knob_changed():
 
 # Reihenfolge der UI-Knobs einer GenAI-Node (fuer die Migration alter Nodes ohne Interface-Knob)
 _UI_KNOB_NAMES = ["ai_tab", "model", "interface", "legal", "mode", "mode_hint", "div_prompt", "prompt", "aspect_ratio",
-                  "resolution", "duration", "quality", "cost_est", "out_dir", "div_go", "provider", "generate",
+                  "resolution", "duration", "quality", "cost_est", "out_dir", "div_go", "provider", "setup", "generate",
                   "status", "last_output", "div_hist", "gen_select", "gen_prev", "gen_next", "extract",
                   "restore_settings", "history", "extract_count"]
 _STATE_KNOBS = ["mode", "prompt", "aspect_ratio", "resolution", "duration", "quality", "out_dir",
@@ -1709,9 +1806,17 @@ def _needs_migration(node):
     if node.knob("model") is None or node.knob("generate") is None:
         return False
     ik = node.knob("interface")
-    if ik is None:
+    if ik is None or node.knob("setup") is None:   # ohne Interface-Dropdown bzw. ohne Setup-Button
         return True
     try:
+        rk = node.knob("resolution")
+        if rk is not None and rk.getFlag(nuke.STARTLINE):   # Resolution gehoert in die Zeile von Aspect Ratio
+            return True
+        cur = node["model"].value()
+        iface = _node_interface(node)
+        m = _find_model(cur, iface)
+        if m is not None and _interface_of(m) not in (None, iface):   # Modell gibt es nur noch im anderen Interface
+            return True
         if (ik.label() or "").strip():            # altes Layout: Dropdown mit Label "Interface"
             return True
         if ik.getFlag(nuke.STARTLINE):            # neues Layout: Interface in der Zeile von Model
@@ -1745,7 +1850,8 @@ def _migrate_node(node):
         hist, hist_index = [], 0
     old_iface = (state.get("interface") or "").strip()
     model = _find_model(state.get("model"), old_iface if old_iface in INTERFACES else None) or load_models()[0]
-    iface = old_iface if old_iface in INTERFACES else (_interface_of(model) or "API")
+    # Das Modell bestimmt das Interface (ein frueher API-Modell kann nur noch in MCP existieren).
+    iface = _interface_of(model) or (old_iface if old_iface in INTERFACES else "API")
     model = _model_by_label(model["label"], iface)
     prov_raw = None
     prov_disp = (state.get("provider") or "").strip()
