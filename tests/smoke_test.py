@@ -36,8 +36,8 @@ def _iface(m):
 
 _pairs = [(_iface(m), m["label"]) for m in models]
 check("Labels sind je Interface eindeutig", len(_pairs) == len(set(_pairs)))
-check("API-Liste = nur was MCP nicht hat",
-      sorted(l for i, l in _pairs if i == "API") == ["Alpha Gen", "Upscale", "Wan 2.7 Video Edit"])
+check("API-Liste = nur was MCP nicht hat (plus Video Depth via fal)",
+      sorted(l for i, l in _pairs if i == "API") == ["Alpha Gen", "Upscale", "Video Depth", "Wan 2.7 Video Edit"])
 check("Jedes Modell hat einen endpoint (oder Provider/Export)",
       all(m.get("endpoint") or m.get("providers") or m.get("local_export") or m.get("modes") for m in models))
 

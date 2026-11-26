@@ -1542,6 +1542,127 @@
       "default_mode": "Grayscale"
     },
     {
+      "id": "video_depth_fal",
+      "label": "Video Depth",
+      "type": "video",
+      "backend": "fal",
+      "endpoint": "fal-ai/depth-anything-video",
+      "requires_input": true,
+      "send_prompt": false,
+      "legal": "yellow",
+      "legal_note": "fal.ai: Footage wird zu fal hochgeladen und dort verarbeitet. Fuer Kundenmaterial vorher klaeren, ob das erlaubt ist.",
+      "eta_sec": 90,
+      "output_ext": "mp4",
+      "raw_result": true,
+      "hint": "Video Depth Anything (VDA-Large) via fal.ai. in1 = footage (whole comp frame range, max 2400 frames, sent at max 1080p). Prompt ignored. Result = per-frame depth video, temporally consistent, same length and fps. Near = bright, far = dark.",
+      "video_ref_duration_bounds": [
+        0.1,
+        96
+      ],
+      "video_max_pixels": 2073600,
+      "guide_fps": "comp",
+      "aspect_ratios": [],
+      "cost": {
+        "unit": "usd",
+        "note": "fal.ai: about $0.04 per second of footage (VDA-Large), billed to your fal key"
+      },
+      "modes": [
+        {
+          "label": "Grayscale",
+          "hint": "Grayscale depth (near = bright, far = dark): the pass for compositing / ZDefocus / relight. in1 = footage (whole comp frame range, max 2400 frames, sent at max 1080p). Prompt ignored.",
+          "input_map": [
+            {
+              "field": "video_url",
+              "video": true
+            }
+          ],
+          "api_static": {
+            "model": "VDA-Large",
+            "resolution": "auto",
+            "colormap": "grayscale"
+          }
+        },
+        {
+          "label": "Float (EXR)",
+          "hint": "Float depth as an EXR sequence (R=G=B) for ZDefocus & co. -- no 8-bit banding. The model's relative depth (near = high, like Nuke's depth.Z), not metres and not 0-1. Big: ~25 MB per 1080p frame on disk (R=G=B, 32-bit). If the float data is not available you get the 8-bit video instead. in1 = footage (whole comp frame range, max 2400 frames, sent at max 1080p). Prompt ignored.",
+          "input_map": [
+            {
+              "field": "video_url",
+              "video": true
+            }
+          ],
+          "api_static": {
+            "model": "VDA-Large",
+            "resolution": "auto",
+            "colormap": "grayscale",
+            "include_raw_depths": true
+          },
+          "raw_depth": true
+        },
+        {
+          "label": "Turbo",
+          "hint": "Colour-coded depth (turbo) to check the result. in1 = footage (whole comp frame range, max 2400 frames, sent at max 1080p). Prompt ignored.",
+          "input_map": [
+            {
+              "field": "video_url",
+              "video": true
+            }
+          ],
+          "api_static": {
+            "model": "VDA-Large",
+            "resolution": "auto",
+            "colormap": "turbo"
+          }
+        },
+        {
+          "label": "Inferno",
+          "hint": "Colour-coded depth (inferno). in1 = footage (whole comp frame range, max 2400 frames, sent at max 1080p). Prompt ignored.",
+          "input_map": [
+            {
+              "field": "video_url",
+              "video": true
+            }
+          ],
+          "api_static": {
+            "model": "VDA-Large",
+            "resolution": "auto",
+            "colormap": "inferno"
+          }
+        },
+        {
+          "label": "Magma",
+          "hint": "Colour-coded depth (magma). in1 = footage (whole comp frame range, max 2400 frames, sent at max 1080p). Prompt ignored.",
+          "input_map": [
+            {
+              "field": "video_url",
+              "video": true
+            }
+          ],
+          "api_static": {
+            "model": "VDA-Large",
+            "resolution": "auto",
+            "colormap": "magma"
+          }
+        },
+        {
+          "label": "Viridis",
+          "hint": "Colour-coded depth (viridis). in1 = footage (whole comp frame range, max 2400 frames, sent at max 1080p). Prompt ignored.",
+          "input_map": [
+            {
+              "field": "video_url",
+              "video": true
+            }
+          ],
+          "api_static": {
+            "model": "VDA-Large",
+            "resolution": "auto",
+            "colormap": "viridis"
+          }
+        }
+      ],
+      "default_mode": "Grayscale"
+    },
+    {
       "id": "ltx_alpha_gen",
       "label": "Alpha Gen",
       "type": "video",
